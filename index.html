@@ -1,0 +1,1427 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bajando mi handicap</title>
+<meta name="theme-color" content="#1D5B40">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mi handicap">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF2EC; --surface:#FFFFFF; --surface2:#E2EAE0; --ink:#12241B; --ink2:#51645A; --line:#C7D3C9;
+  --green:#1D5B40; --on-green:#FFFFFF; --green-soft:#D5E6DB;
+  --flag:#F2C230; --on-flag:#2A2203; --orange:#C25E0A; --gold:#D4A62A; --on-gold:#2A2203; --red:#B3312A; --water:#2A6F97; --on-red:#FFFFFF;
+  --display:'Barlow Condensed','Roboto Condensed','Arial Narrow',system-ui,sans-serif;
+  --body:'Barlow',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1713; --surface:#16231C; --surface2:#1F3027; --ink:#E7EFE9; --ink2:#9DB0A4; --line:#2E4337;
+    --green:#49A77A; --on-green:#06110B; --green-soft:#1D3A2C;
+    --flag:#F2C230; --on-flag:#2A2203; --orange:#F2A04E; --gold:#E3B946; --on-gold:#2A2203; --red:#EC7067; --water:#62AEDA; --on-red:#1E0706;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1713; --surface:#16231C; --surface2:#1F3027; --ink:#E7EFE9; --ink2:#9DB0A4; --line:#2E4337;
+  --green:#49A77A; --on-green:#06110B; --green-soft:#1D3A2C;
+  --flag:#F2C230; --on-flag:#2A2203; --orange:#F2A04E; --gold:#E3B946; --on-gold:#2A2203; --red:#EC7067; --water:#62AEDA; --on-red:#1E0706;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 var(--body);-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:3px solid var(--flag);outline-offset:2px}
+h1,h2,h3{font-family:var(--display);font-weight:600;margin:0;line-height:1.1}
+h1{font-size:34px;letter-spacing:.2px}
+h2{font-size:22px}
+h3{font-size:18px}
+p{margin:0}
+.muted{color:var(--ink2)}
+.small{font-size:14px}
+.num{font-family:var(--display);font-variant-numeric:tabular-nums}
+
+#app{max-width:560px;margin:0 auto;padding:18px 16px 110px}
+#app.inround{padding-bottom:190px}
+
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:18px}
+.top .sub{color:var(--ink2);font-size:14px;margin-top:2px}
+.bar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;margin-bottom:14px}
+.bar h1{font-size:19px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.bar > :first-child{justify-self:start}
+.bar > :last-child{justify-self:end}
+.link{background:none;border:0;padding:8px 2px;color:var(--green);font-weight:600;text-decoration:underline;text-underline-offset:3px}
+
+.block{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
+.block > h2{margin-bottom:10px}
+.block > h3{margin-bottom:8px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.stack > * + *{margin-top:10px}
+
+.btn{border:1.5px solid var(--green);background:transparent;color:var(--green);border-radius:12px;padding:12px 16px;font-weight:600;min-height:48px}
+.btn.primary{background:var(--green);color:var(--on-green)}
+.btn.flag{background:var(--flag);border-color:var(--flag);color:var(--on-flag)}
+.btn.big{width:100%;font-family:var(--display);font-size:24px;padding:16px;letter-spacing:.3px}
+.btn.quiet{border-color:var(--line);color:var(--ink)}
+.btn.danger{border-color:var(--red);color:var(--red)}
+.btn:disabled{opacity:.45;cursor:default}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips.scroll{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.chips.scroll::-webkit-scrollbar{display:none}
+.chip{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:10px 16px;min-height:44px;font-weight:500;white-space:nowrap}
+.chip[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--on-green);font-weight:600}
+.chip.bad[aria-pressed="true"]{background:var(--red);border-color:var(--red);color:var(--on-red)}
+.chip.pen[aria-pressed="true"]{background:var(--water);border-color:var(--water);color:var(--on-red)}
+.chips.four{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.chips.four .chip{padding:10px 2px;font-size:15px;text-align:center}
+
+input[type=number],input[type=text],input[type=date]{border:1.5px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 12px;min-height:44px;width:100%}
+input.narrow{width:84px;text-align:center}
+label.f{display:block;font-size:14px;color:var(--ink2);margin-bottom:4px}
+
+/* hole strip */
+.strip{display:flex;gap:6px;overflow-x:auto;padding:4px 2px 10px;margin:0 -2px 6px;scrollbar-width:none}
+.strip::-webkit-scrollbar{display:none}
+.hp{flex:0 0 auto;width:40px;border:1.5px solid var(--line);background:var(--surface);border-radius:10px;padding:5px 0 6px;text-align:center}
+.hp .n{display:block;font-size:12px;color:var(--ink2);line-height:1}
+.hp .v{display:flex;align-items:center;justify-content:center;height:26px;margin-top:3px}
+.hp[aria-current="true"]{background:var(--flag);border-color:var(--flag)}
+.hp.locked{opacity:.4;border-style:dashed}
+.hp{position:relative}
+.hp.inc::after{content:"";position:absolute;top:3px;right:3px;width:7px;height:7px;border-radius:50%;background:var(--red)}
+.stat.falta{border-color:var(--red);box-shadow:0 0 0 1px var(--red)}
+.stat.falta h3::after{content:" · falta";color:var(--red);font-size:15px;font-weight:600}
+.hp[aria-current="true"] .n,.hp[aria-current="true"] .mk{color:var(--on-flag)}
+.hp[aria-current="true"] .mk.birdie,.hp[aria-current="true"] .mk.eagle,.hp[aria-current="true"] .mk.par{border-color:var(--on-flag)}
+.hp[aria-current="true"] .mk.eagle,.hp[aria-current="true"] .mk.double{box-shadow:0 0 0 2px var(--flag),0 0 0 3.5px var(--on-flag)}
+
+/* traditional scorecard notation */
+.mk{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;font-family:var(--display);font-weight:600;font-size:18px;line-height:1;font-variant-numeric:tabular-nums}
+.mk.birdie{position:relative;isolation:isolate;min-width:30px;height:30px;font-size:15px;font-weight:700;padding-top:4px;color:var(--on-gold);border:0}
+.mk.birdie::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--gold);clip-path:polygon(50% 0%,61.8% 34.5%,98% 34.5%,68.6% 56.9%,79.4% 91%,50% 70%,20.6% 91%,31.4% 56.9%,2% 34.5%,38.2% 34.5%)}
+.hp .mk.birdie{min-width:26px;height:26px;font-size:13px;padding-top:2px}
+.hp[aria-current="true"] .mk.birdie{color:var(--flag)}
+.hp[aria-current="true"] .mk.birdie::before{background:var(--on-flag)}
+.mk.par{border:1.5px solid var(--green);border-radius:50%;color:var(--green)}
+.mk.eagle{border:1.5px solid var(--red);border-radius:50%;color:var(--red);box-shadow:0 0 0 2px var(--surface),0 0 0 3.5px var(--red)}
+.mk.bogey{border:1.5px solid currentColor}
+.mk.double{border:1.5px solid currentColor;box-shadow:0 0 0 2px var(--surface),0 0 0 3.5px currentColor;color:var(--orange)}
+.mk.double.triple{color:var(--red)}
+.mk.empty{color:var(--line)}
+
+/* hole header */
+.hole{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;margin-bottom:12px}
+.hole .big{font-family:var(--display);font-weight:700;font-size:76px;line-height:.85;letter-spacing:-1px}
+.hole .big small{display:block;font-size:15px;font-weight:500;color:var(--ink2);letter-spacing:0;margin-bottom:6px}
+.hole dl{display:grid;grid-template-columns:repeat(3,auto);gap:2px 16px;margin:0;justify-content:start}
+.hole dt{font-size:13px;color:var(--ink2)}
+.hole dd{margin:0;font-family:var(--display);font-size:24px;font-weight:600;line-height:1}
+.hole .pp{margin-top:8px;font-size:14px;color:var(--ink2)}
+.hole .pp b{color:var(--ink)}
+
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:10px}
+.stat > .row h3{font-size:20px}
+.stat .hint{font-size:13px;color:var(--ink2);margin-top:2px}
+.stat .chips{margin-top:10px}
+.stepper{display:flex;align-items:center;gap:6px}
+.stepper button{width:52px;height:52px;border-radius:50%;border:1.5px solid var(--green);background:transparent;color:var(--green);font-family:var(--display);font-size:30px;line-height:1;font-weight:600}
+.stepper output{min-width:56px;text-align:center;font-family:var(--display);font-weight:700;font-size:44px;line-height:1;font-variant-numeric:tabular-nums}
+.stepper.sm button{width:44px;height:44px;font-size:24px}
+.stepper.sm output{font-size:30px;min-width:44px}
+.stepper output.none{color:var(--line)}
+.scoreline{font-size:14px;color:var(--ink2);margin-top:6px;text-align:right}
+.scoreline b{color:var(--ink)}
+.dist{display:flex;align-items:center;gap:8px;margin-top:10px}
+.dist input{width:96px;text-align:center;font-family:var(--display);font-size:28px;font-weight:600;padding:6px 8px}
+.dist .u{color:var(--ink2)}
+.dist button{width:48px;height:48px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);font-weight:600}
+details.more{margin-bottom:10px}
+details.more summary{padding:10px 4px;color:var(--green);font-weight:600;cursor:pointer;list-style:none}
+details.more summary::-webkit-details-marker{display:none}
+details.more summary::before{content:"+ "}
+details.more[open] summary::before{content:"− "}
+.mini{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid var(--line)}
+.mini:first-of-type{border-top:0}
+
+/* bottom bars */
+.dock{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));z-index:5}
+.dock .in{max-width:528px;margin:0 auto}
+.tabs{display:grid;grid-template-columns:repeat(5,1fr);gap:2px}
+.tab{background:none;border:0;padding:6px 2px;border-radius:10px;font-size:13px;color:var(--ink2);display:flex;flex-direction:column;align-items:center;gap:3px;min-height:48px}
+.tab svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tab[aria-current="page"]{color:var(--green);font-weight:600;background:var(--green-soft)}
+.dict{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center}
+.dict input{min-height:48px}
+.mic{width:48px;height:48px;border-radius:50%;border:0;background:var(--flag);color:var(--on-flag);display:flex;align-items:center;justify-content:center}
+.mic svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.mic.on{background:var(--red);color:var(--on-red);animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.08)}}
+@media (prefers-reduced-motion: reduce){.mic.on{animation:none}}
+.dnote{font-size:13px;color:var(--ink2);margin:6px 2px 0;min-height:0}
+.dnote button{margin-left:6px}
+.nav2{display:grid;grid-template-columns:1fr 1.6fr;gap:8px;margin-top:10px}
+
+/* scorecard table */
+.cardwrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface);margin-bottom:10px}
+table.sc{border-collapse:collapse;width:100%;min-width:320px;font-variant-numeric:tabular-nums}
+.sc th,.sc td{padding:6px 1px;text-align:center;font-size:12.5px;border-bottom:1px solid var(--line);min-width:25px}
+.sc tr:last-child th,.sc tr:last-child td{border-bottom:0}
+.sc th[scope=row]{text-align:left;padding-left:8px;font-weight:500;color:var(--ink2);white-space:nowrap;min-width:54px}
+.sc thead th{background:var(--green);color:var(--on-green);font-family:var(--display);font-size:16px;font-weight:600}
+.sc thead th[scope=row]{color:var(--on-green)}
+.sc td.tot,.sc th.tot{font-weight:600;border-left:1px solid var(--line);min-width:36px;padding-right:4px;font-family:var(--display);font-size:15px}
+.sc thead th.tot{border-left-color:transparent}
+.sc .mk{min-width:19px;height:19px;font-size:15px}
+.sc .mk.birdie{min-width:30px;height:30px;font-size:14px;font-weight:700;padding-top:4px}
+.sc .mk.eagle{box-shadow:0 0 0 1.5px var(--surface),0 0 0 2.5px var(--red)}
+.sc .mk.double{box-shadow:0 0 0 1.5px var(--surface),0 0 0 2.5px currentColor}
+.sc .y{color:var(--green);font-weight:600}
+.sc .x{color:var(--red);font-weight:600}
+
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 10px}
+.kpi .v{font-family:var(--display);font-weight:700;font-size:34px;line-height:1;font-variant-numeric:tabular-nums}
+.kpi .v small{font-size:16px;font-weight:500;color:var(--ink2);margin-left:2px}
+.kpi .k{font-size:13px;color:var(--ink2);margin-top:4px;line-height:1.25}
+.kpis.two{grid-template-columns:repeat(2,1fr)}
+.kpis.four{grid-template-columns:repeat(4,1fr)}
+.kpis.four .kpi .v{font-size:28px}
+
+.list{list-style:none;margin:0;padding:0}
+.list li + li{border-top:1px solid var(--line)}
+.item{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;width:100%;text-align:left;background:none;border:0;padding:12px 0}
+.item .t{font-weight:600}
+.item .s{font-size:14px;color:var(--ink2)}
+.item .g{font-family:var(--display);font-size:30px;font-weight:700;line-height:1;text-align:right}
+.item .g small{display:block;font-size:14px;font-weight:500;color:var(--ink2)}
+
+.bars{display:grid;gap:10px}
+.barrow{display:grid;grid-template-columns:1fr auto;gap:4px 8px;align-items:baseline;font-size:14px}
+.barrow .track{grid-column:1/-1;grid-row:2}
+.barrow .track{height:14px;background:var(--surface2);border-radius:4px;overflow:hidden}
+.barrow .fill{height:100%;background:var(--green);border-radius:4px}
+.barrow .r{text-align:right;color:var(--ink2);font-variant-numeric:tabular-nums}
+.split{display:flex;height:40px;border-radius:8px;overflow:hidden;margin:8px 0 6px}
+.split div{display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:600;font-size:18px;min-width:44px}
+.split .a{background:var(--surface2);color:var(--ink)}
+.split .b{background:var(--green);color:var(--on-green)}
+.legend{display:flex;justify-content:space-between;font-size:13px;color:var(--ink2)}
+.tbl{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+.tbl th,.tbl td{padding:7px 4px;text-align:right;border-bottom:1px solid var(--line)}
+.tbl th:first-child,.tbl td:first-child{text-align:left;white-space:nowrap}
+.tbl thead th{font-weight:500;color:var(--ink2);font-size:13px}
+.tbl tr:last-child td{border-bottom:0}
+.note{background:var(--green-soft);border-radius:12px;padding:12px 14px;font-size:15px;margin-bottom:12px}
+.empty{padding:26px 8px;text-align:center;color:var(--ink2)}
+.empty h2{color:var(--ink);margin-bottom:6px}
+
+.edit{width:100%;border-collapse:collapse}
+.edit th{font-size:13px;font-weight:500;color:var(--ink2);padding:4px 2px;text-align:center}
+.edit td{padding:3px 2px;text-align:center}
+.edit td:first-child{font-family:var(--display);font-weight:600;font-size:18px;width:34px}
+.edit input{padding:6px 4px;min-height:40px;text-align:center}
+
+/* gps */
+.gpsbig{display:flex;align-items:baseline;gap:8px;margin-top:10px}
+.gpsbig b{font-family:var(--display);font-weight:700;font-size:56px;line-height:1;font-variant-numeric:tabular-nums}
+.gpsbig span{color:var(--ink2);font-size:15px}
+.gpsacc{font-size:13px;color:var(--ink2);margin-top:2px}
+.gpsacc.warn{color:var(--red)}
+.gpsbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.gpsbtns .btn{padding:10px 8px;font-size:15px}
+.shots{list-style:none;margin:10px 0 0;padding:0;font-size:15px}
+.shots li{display:flex;justify-content:space-between;padding:7px 0;border-top:1px solid var(--line)}
+.shots li b{font-family:var(--display);font-size:20px;font-weight:600;font-variant-numeric:tabular-nums}
+#toast{position:fixed;left:12px;right:12px;margin:0 auto;bottom:calc(96px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:12px 16px;border-radius:12px;font-size:15px;max-width:520px;z-index:20;display:none;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+#toast.show{display:flex}
+#toast.high{bottom:calc(186px + env(safe-area-inset-bottom,0px))}
+#toast button{background:none;border:0;color:inherit;font-weight:700;text-decoration:underline;text-underline-offset:3px;padding:8px 4px;white-space:nowrap}
+.sync{font-size:13px;color:var(--ink2);text-align:right;line-height:1.25}
+@media (min-width:620px){ #app{padding-top:28px} }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<script>
+(function(){
+'use strict';
+
+/* ---------- Datos base ---------- */
+// Tarjeta del Río Cuarto Golf Club (par 72). Editable desde la pestaña Cancha.
+var RCGC = { id:'rcgc', name:'Río Cuarto Golf Club', holes:[
+  [1,4,7,435,395],[2,4,13,354,303],[3,4,1,440,383],[4,4,9,378,340],[5,5,3,530,446],[6,3,17,176,155],
+  [7,4,15,344,318],[8,3,11,209,188],[9,4,5,410,373],[10,4,2,454,374],[11,3,18,182,150],[12,4,16,352,296],
+  [13,4,8,397,333],[14,5,14,487,423],[15,5,4,515,483],[16,3,12,203,153],[17,4,6,400,355],[18,5,10,529,479]
+].map(function(a){return {n:a[0],par:a[1],si:a[2],ydH:a[3],ydD:a[4]};}) };
+
+// Casa de Campo, La Romana (RD). Caballeros = salida blanca, Damas = salida roja.
+var TOTD = { id:'totd', v:2, name:'Diente de Perro (Casa de Campo)', holes:[
+  [1,4,7,332,277],[2,4,13,346,249],[3,5,11,436,374],[4,4,3,344,297],[5,3,15,122,68],[6,4,1,355,333],
+  [7,3,17,122,89],[8,4,5,335,287],[9,5,9,514,400],[10,4,8,352,299],[11,5,10,536,469],[12,4,4,357,324],
+  [13,3,16,137,89],[14,5,14,454,361],[15,4,12,302,247],[16,3,18,142,84],[17,4,2,330,266],[18,4,6,375,311]
+].map(function(a){return {n:a[0],par:a[1],si:a[2],ydH:a[3],ydD:a[4]};}) };
+
+// Iberostar Bávaro, Punta Cana (RD). Caballeros = salida blanca, Damas = salida roja (hoyos 11 a 14 con yardas de la blanca: sin dato confiable).
+var IBB = { id:'ibb', v:2, name:'Iberostar Bávaro', holes:[
+  [1,4,16,308,250],[2,3,6,170,118],[3,4,12,274,240],[4,4,2,355,327],[5,5,18,448,408],[6,4,4,317,257],
+  [7,4,14,290,262],[8,3,10,148,103],[9,5,8,484,417],[10,4,9,323,293],[11,3,3,175,175],[12,4,11,309,309],
+  [13,5,15,424,424],[14,4,1,335,335],[15,4,13,256,224],[16,3,7,103,73],[17,5,17,456,367],[18,4,5,364,330]
+].map(function(a){return {n:a[0],par:a[1],si:a[2],ydH:a[3],ydD:a[4]};}) };
+
+// Canchas que trae la app. Cada una se agrega una sola vez; si la quitás, no vuelve.
+var BUILTINS=[RCGC,TOTD,IBB];
+function ensureBuiltins(){
+  var p=S.profile, ch=false;
+  if(!Array.isArray(p.seeded)) p.seeded=['rcgc'];
+  BUILTINS.forEach(function(b){
+    if(!p.seededV) p.seededV={};
+    if(p.seeded.indexOf(b.id)>=0){
+      // Actualiza la tarjeta si la app trae una versión más nueva de esa cancha.
+      var cur=p.courses.filter(function(c){return c.id===b.id;})[0];
+      if(cur&&b.v&&(p.seededV[b.id]||1)<b.v){ cur.holes=clone(b.holes); p.seededV[b.id]=b.v; ch=true; }
+      return;
+    }
+    p.seeded.push(b.id); ch=true; if(b.v) p.seededV[b.id]=b.v;
+    if(!p.courses.some(function(c){return c.id===b.id;})) p.courses.push(clone(b));
+  });
+  if(ch) p.updatedAt=Date.now();
+  return ch;
+}
+
+var LS_KEY='mi-tarjeta-golf-v1';
+var S={ profile:{hcp:null,courses:[clone(RCGC)],deleted:[],updatedAt:0}, rounds:{} };
+var TIPOS={torneo:'Torneo',amigos:'Con amigos',practica:'Práctica'}, TIPO_ORD=['torneo','amigos','practica'];
+function tipoOf(r){return TIPOS[r.tipo]?r.tipo:'amigos';}
+var UI={ view:'home', roundId:null, hole:null, range:'all', tipo:'all', more:false, setup:null, dict:'', dnote:'', confirmDel:null, courseId:'rcgc', micOn:false, micBlocked:false };
+var cloud='pending', db=null, col=null, sampleFn=null, downloads=null;
+
+function clone(o){return JSON.parse(JSON.stringify(o));}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function today(){var d=new Date();return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);}
+function fdate(s,long){var p=(s||today()).split('-');var d=new Date(+p[0],+p[1]-1,+p[2]);return d.toLocaleDateString('es-AR',long?{weekday:'long',day:'numeric',month:'long',year:'numeric'}:{day:'numeric',month:'short',year:'2-digit'});}
+function f1(x){return (x==null||isNaN(x))?'–':x.toLocaleString('es-AR',{minimumFractionDigits:1,maximumFractionDigits:1});}
+function pct(a,b){return b?Math.round(100*a/b)+'%':'–';}
+function rel(x){return x===0?'par':(x>0?'+'+x:'−'+Math.abs(x));}
+function relF(x){if(x==null||isNaN(x))return '–';var r=Math.round(x*10)/10;return (r>0?'+':(r<0?'−':''))+f1(Math.abs(r));}
+function ydToM(y){return Math.round(y*0.9144);}
+function courseById(id){return S.profile.courses.filter(function(c){return c.id===id;})[0];}
+function scoreName(d){return d<=-3?'albatros':d===-2?'eagle':d===-1?'birdie':d===0?'par':d===1?'bogey':d===2?'doble bogey':d===3?'triple bogey':'+'+d;}
+function mkClass(d){return d<=-2?'eagle':d===-1?'birdie':d===0?'par':d===1?'bogey':d===2?'double':d>=3?'double triple':'';}
+function mk(s,par){return s==null?'<span class="mk empty">·</span>':'<span class="mk '+mkClass(s-par)+'">'+s+'</span>';}
+
+/* ---------- Guardado local + en la cuenta ---------- */
+function loadLocal(){
+  try{ var raw=localStorage.getItem(LS_KEY); if(!raw) return; var d=JSON.parse(raw);
+    if(d&&d.profile&&Array.isArray(d.profile.courses)&&d.profile.courses.length){ S.profile=d.profile; if(!Array.isArray(S.profile.deleted)) S.profile.deleted=[]; }
+    if(d&&d.rounds&&typeof d.rounds==='object') S.rounds=d.rounds;
+  }catch(e){}
+}
+function saveLocal(){ try{ localStorage.setItem(LS_KEY,JSON.stringify(S)); }catch(e){} }
+var dirty={}, inflight={}, flushT=null;
+function markDirty(key){ saveLocal(); dirty[key]=1; scheduleFlush(800); }
+function scheduleFlush(ms){ if(cloud!=='on') return; clearTimeout(flushT); flushT=setTimeout(flush,ms); }
+function flush(){
+  if(cloud!=='on'||!col) return;
+  Object.keys(dirty).forEach(function(key){
+    if(inflight[key]) return;
+    delete dirty[key]; inflight[key]=1;
+    var p;
+    try{
+      if(key==='profile') p=col.doc('profile').set(clone(S.profile));
+      else if(key.indexOf('del:')===0) p=col.doc(key.slice(4)).delete();
+      else { var r=S.rounds[key.slice(2)]; p=r?col.doc(key).set(clone(r)):Promise.resolve(); }
+    }catch(e){ p=Promise.reject(e); }
+    p.then(function(){ delete inflight[key]; if(dirty[key]) scheduleFlush(300); })
+     .catch(function(e){ delete inflight[key];
+        var code=e&&e.code;
+        if(code==='unavailable'||code==='resource_exhausted'){ dirty[key]=1; scheduleFlush(5000); }
+        else { cloud='off'; paintSync(); }
+     });
+  });
+}
+function initCloud(){
+  if(!window.claude||typeof window.claude.use!=='function'){ cloud='off'; paintSync(); return; }
+  window.claude.use('sample').then(function(s){ sampleFn=s||null; }).catch(function(){});
+  window.claude.use('downloads').then(function(d){ downloads=d||null; if(UI.view==='course') render(); }).catch(function(){});
+  Promise.all([window.claude.use('db'),window.claude.use('user')]).then(function(a){
+    if(!a[0]||!a[1]) throw 0;
+    db=a[0]; return a[1].id();
+  }).then(function(id){
+    if(!id) throw 0;
+    col=db.collection('data/users/'+id);
+    return col.get();
+  }).then(function(snap){
+    var remote={}, rprof=null;
+    snap.docs.forEach(function(doc){ var d=doc.data(); if(!d) return; if(doc.id==='profile') rprof=clone(d); else if(doc.id.indexOf('r_')===0) remote[doc.id.slice(2)]=clone(d); });
+    var del={}; (S.profile.deleted||[]).forEach(function(x){del[x]=1;});
+    if(rprof){ (rprof.deleted||[]).forEach(function(x){del[x]=1;});
+      if((rprof.updatedAt||0)>(S.profile.updatedAt||0)&&Array.isArray(rprof.courses)&&rprof.courses.length){ S.profile=rprof; }
+      else if((S.profile.updatedAt||0)>(rprof.updatedAt||0)) dirty.profile=1;
+    } else if(S.profile.updatedAt) dirty.profile=1;
+    var delList=Object.keys(del).slice(-300);
+    if(!rprof||(rprof.deleted||[]).length!==delList.length) dirty.profile=1;
+    S.profile.deleted=delList;
+    Object.keys(remote).forEach(function(id){
+      if(del[id]){ dirty['del:r_'+id]=1; return; }
+      var loc=S.rounds[id];
+      if(!loc||(remote[id].updatedAt||0)>(loc.updatedAt||0)) S.rounds[id]=remote[id];
+      else if((loc.updatedAt||0)>(remote[id].updatedAt||0)) dirty['r_'+id]=1;
+    });
+    Object.keys(S.rounds).forEach(function(id){ if(del[id]){ delete S.rounds[id]; return; } if(!remote[id]) dirty['r_'+id]=1; });
+    if(ensureBuiltins()) dirty.profile=1;
+    cloud='on'; saveLocal(); flush();
+    var ae=document.activeElement; if(!ae||(ae.tagName!=='INPUT')) render(); else paintSync();
+  }).catch(function(){ cloud='off'; paintSync(); });
+}
+function syncText(){ return cloud==='on'?'Guardado en tu cuenta':cloud==='pending'?'Conectando…':'Guardado en este celular'; }
+function paintSync(){ var el=document.querySelector('.sync'); if(el) el.textContent=syncText(); }
+
+/* ---------- Cálculos ---------- */
+function recvMap(holes,hcp){
+  var n=holes.length, m={}; if(!n) return m;
+  var H=Math.max(0,Math.round(+hcp||0)); if(n<18) H=Math.round(H*n/18);
+  var order=holes.slice().sort(function(a,b){return a.si-b.si;}); var base=Math.floor(H/n), extra=H%n;
+  order.forEach(function(h,i){ m[h.n]=base+(i<extra?1:0); }); return m;
+}
+function totals(r,pid){
+  var hcp=r.hcp, src=null;
+  if(pid){ var pl=(r.players||[]).filter(function(p){return p.id===pid;})[0]; hcp=pl?pl.hcp:0; src=(r.others&&r.others[pid])||{}; }
+  var rc=recvMap(r.holes,hcp), t={g:0,par:0,net:0,pts:0,n:0};
+  r.holes.forEach(function(h){ var s=src?src[h.n]:(r.scores[h.n]||{}).s; if(s==null) return;
+    t.n++; t.g+=s; t.par+=h.par; t.net+=s-(rc[h.n]||0); t.pts+=Math.max(0,2+h.par+(rc[h.n]||0)-s); });
+  t.rel=t.g-t.par; t.netRel=t.net-t.par; return t;
+}
+function myNums(rounds){
+  var a={salN:0,salOk:0,gdN:0,gdSum:0,cN:0,cSum:0,c2:0};
+  rounds.forEach(function(r){ r.holes.forEach(function(h){ var d=r.scores[h.n]; if(!d) return;
+    if(h.par>3&&d.sal!=null){a.salN++; if(d.sal)a.salOk++;}
+    if(d.gd!=null){a.gdN++;a.gdSum+=d.gd;}
+    if(d.c!=null){a.cN++;a.cSum+=d.c;if(d.c<=2)a.c2++;} }); });
+  return a;
+}
+function sortedRounds(){ return Object.keys(S.rounds).map(function(k){return S.rounds[k];}).sort(function(a,b){ return a.date===b.date?(b.createdAt||0)-(a.createdAt||0):(a.date<b.date?1:-1); }); }
+function activeRound(){ return sortedRounds().filter(function(r){return r.status==='en_curso';})[0]; }
+/* Un hoyo está cargado cuando tiene golpes, salida, a green y cerca. En una vuelta en curso no se avanza sin completar los anteriores. */
+var REQ=[['s','golpes'],['sal','salida'],['gd','a green'],['c','cerca'],['an','cómo estás'],['rut','rutina']];
+var ANIMO={tranq:'Tranquilo',tenso:'Ansioso',enf:'Enfadado'}, ANIMO_ORD=['tranq','tenso','enf'];
+function faltan(r,n){ var d=r.scores[n]||{}; return REQ.filter(function(q){return d[q[0]]==null;}).map(function(q){return q[1];}); }
+function lista(a){ return a.length<2?a.join(''):a.slice(0,-1).join(', ')+' y '+a[a.length-1]; }
+function enCurso(r){ return r&&r.status==='en_curso'; }
+function sinGolpes(r,n){ return (r.scores[n]||{}).s==null; }
+function bloqueo(r,target){ if(!enCurso(r)) return null; var ti=r.holes.findIndex(function(h){return h.n===target;});
+  for(var i=0;i<ti;i++){ var n=r.holes[i].n; if(sinGolpes(r,n)) return n; } return null; }
+function avisarFalta(r,n){ UI.hole=n; UI.falta=n; UI.dnote=''; toast('Primero cargá el total de golpes del hoyo '+n+'.'); render(); window.scrollTo(0,0); }
+function firstPending(r){ for(var i=0;i<r.holes.length;i++){ if(sinGolpes(r,r.holes[i].n)) return r.holes[i].n; } return r.holes[r.holes.length-1].n; }
+
+/* ---------- Dictado ---------- */
+var UNITS={cero:0,un:1,uno:1,una:1,dos:2,tres:3,cuatro:4,cinco:5,seis:6,siete:7,ocho:8,nueve:9,diez:10,once:11,doce:12,trece:13,catorce:14,quince:15,dieciseis:16,diecisiete:17,dieciocho:18,diecinueve:19,veinte:20,veintiun:21,veintiuno:21,veintidos:22,veintitres:23,veinticuatro:24,veinticinco:25,veintiseis:26,veintisiete:27,veintiocho:28,veintinueve:29};
+var TENS={treinta:30,cuarenta:40,cincuenta:50,sesenta:60,setenta:70,ochenta:80,noventa:90};
+var HUND={cien:100,ciento:100,doscientos:200,trescientos:300};
+function has(o,k){return Object.prototype.hasOwnProperty.call(o,k);}
+function wordsToDigits(t){
+  var w=t.split(/\s+/), out=[], i=0;
+  while(i<w.length){ var tok=w[i], val=null, j=i;
+    if(has(HUND,tok)){ val=HUND[tok]; j=i+1;
+      if(has(TENS,w[j])){ val+=TENS[w[j]]; j++; if(w[j]==='y'&&has(UNITS,w[j+1])&&UNITS[w[j+1]]<10){ val+=UNITS[w[j+1]]; j+=2; } }
+      else if(has(UNITS,w[j])){ val+=UNITS[w[j]]; j++; } }
+    else if(has(TENS,tok)){ val=TENS[tok]; j=i+1; if(w[j]==='y'&&has(UNITS,w[j+1])&&UNITS[w[j+1]]<10){ val+=UNITS[w[j+1]]; j+=2; } }
+    else if(has(UNITS,tok)){ val=UNITS[tok]; j=i+1; }
+    if(val!==null){ out.push(String(val)); i=j; } else { out.push(tok); i++; } }
+  return out.join(' ');
+}
+function parseDictado(raw,par){
+  var R={}, t=' '+String(raw||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9ñ ]+/g,' ').replace(/\s+/g,' ').trim()+' ';
+  function take(re,fn){ var m=t.match(re); if(m){ fn(m); t=t.replace(m[0],' | '); return true; } return false; }
+  function dist(m){ var v=+m[1]; if(m[2]&&/^y/.test(m[2])) v=Math.round(v*0.9144); R.gd=v; }
+  take(/\bhoyo en (uno|1)\b/,function(){R.s=1;});
+  t=' '+wordsToDigits(t.trim())+' ';
+  take(/\b(siguiente|proximo)( hoyo)?\b/,function(){R.next=true;});
+  take(/\bhoyo (?:numero )?(\d{1,2})\b/,function(m){R.hoyo=+m[1];});
+  // en green / no en green (sin consumir texto)
+  if(/\b(no llegue|falle (el )?green|fuera del? green|afuera del? green|no quedo en (el )?green|no (la )?deje en (el )?green|green fallado|no tome (el )?green)\b/.test(t)) R.ge=false;
+  else if(/\b(en (el )?green|tome (el )?green|agarre (el )?green)\b/.test(t)) R.ge=true;
+  // cerca
+  take(/\b(\d{1,2}) (?:golpes? )?de cerca\b/,function(m){R.c=+m[1];})
+   || take(/\bcerca (?:de )?(?:hice |fueron |son )?(\d{1,2})\b(?! ?metros)/,function(m){R.c=+m[1];})
+   || take(/\b(\d{1,2}) (?:golpes? )?cerca\b/,function(m){R.c=+m[1];})
+   || take(/\b(\d{1,2}) (?:golpes? )?(?:desde |de )?(?:adentro|dentro|menos) de (?:los )?90(?: metros)?\b/,function(m){R.c=+m[1];});
+  // putts y penales
+  var PT='(?:putts?|puts?|pats?|pots?)';
+  take(new RegExp('\\bcortos? (\\d{1,2})\\b(?! ?'+PT+')'),function(m){R.pc=+m[1];})
+   || take(new RegExp('\\b(\\d{1,2}) '+PT+' (?:cortos?|(?:de |desde )?(?:menos de )?(?:1|un) metro)\\b'),function(m){R.pc=+m[1];});
+  take(/\b(\d{1,2}) (?:putts?|puts?|pats?|pots?)\b/,function(m){R.p=+m[1];}) || take(/\b(?:putts?|puts?|pats?) (\d{1,2})\b/,function(m){R.p=+m[1];});
+  if(R.pc==null) take(/\b(\d{1,2}) (?:cortos?|(?:de |desde )?menos de 1 metro)\b/,function(m){R.pc=+m[1];});
+  take(/\bsin (?:penal(?:es|idad|idades)?|multas?)\b/,function(){R.pen=0;}) || take(/\b(\d) (?:golpes? de )?(?:penal(?:es|idad|idades)?|multas?)\b/,function(m){R.pen=+m[1];});
+  // distancia al green
+  take(/\b(?:al |a |el )?green (?:fue )?(?:desde |de |a |con )?(?:los |las )?(\d{2,3})(?: (metros|yardas|m|yd))?\b/,dist)
+   || take(/\b(\d{2,3})(?: (metros|yardas|m|yd))? (?:al|a|para el|hasta el|del) green\b/,dist)
+   || take(/\b(?:desde|tiro de|tire de|pegue de|pegue desde|de) (?:los |las )?(\d{2,3})(?: (metros|yardas|m|yd))?\b/,dist)
+   || take(/\b(\d{2,3}) (metros|yardas)\b/,dist);
+  // salida
+  var neg=/\b(fuera de juego|no (?:quedo |esta |estuvo |fue )?en juego|salida (?:perdida|mala|afuera|fuera|no)|perdi la salida|fuera de limites|injugable|al agua|(?:bola|pelota) perdida|a los arboles)\b/.test(t);
+  var pos=/\b(en juego|en (?:el )?fairway|en (?:la )?calle|salida (?:buena|bien|ok|perfecta|si|al medio))\b/.test(t);
+  if(neg) R.sal=false; else if(pos) R.sal=true;
+  var side=t.match(/\b(?:salida|drive|driver|tee)\b[^|]{0,40}?\b(izquierda|derecha)\b/)||(R.sal===false?t.match(/\b(izquierda|derecha)\b/):null);
+  if(side){ R.lado=side[1]==='izquierda'?'izq':'der'; if(R.sal==null) R.sal=false; }
+  if(/\b(al agua|fuera de limites)\b/.test(t)&&R.sal===false&&!R.lado) R.lado='pen';
+  // golpes
+  if(R.s==null){
+    take(/\b(\d{1,2}) golpes?\b/,function(m){R.s=+m[1];})
+    || take(/\bcuadruple(?: (?:bogey|bogi|bogui|boggie|bogie|bogy|boguey))?\b/,function(){R.s=par+4;})
+    || take(/\btriple(?: (?:bogey|bogi|bogui|boggie|bogie|bogy|boguey))?\b/,function(){R.s=par+3;})
+    || take(/\bdoble(?: (?:bogey|bogi|bogui|boggie|bogie|bogy|boguey))?\b/,function(){R.s=par+2;})
+    || take(/\b(bogey|bogi|bogui|boggie|bogie|bogy|boguey)\b/,function(){R.s=par+1;})
+    || take(/\b(birdie|birdi|berdi|berdie|birdy|pajarito)\b/,function(){R.s=par-1;})
+    || take(/\b(eagle|igol|aguila)\b/,function(){R.s=par-2;})
+    || take(/\balbatros\b/,function(){R.s=par-3;})
+    || take(/\bpar\b(?! \d)/,function(){R.s=par;})
+    || take(/\b(?:hice|fueron|son|total|score|anote|puse) (\d{1,2})\b/,function(m){R.s=+m[1];});
+    if(R.s==null){ var rest=t.replace(/\|/g,' ').replace(/\s+/g,' ').trim(); var m=rest.match(/^(\d{1,2})$/); if(m) R.s=+m[1]; }
+  }
+  take(/\b(?:sin|no (?:hice|aplique|use|segui|respete))(?: (?:la|mi))? rutina\b/,function(){R.rut=false;}) || take(/\b(?:con|aplique|hice|segui|use|respete)(?: (?:la|mi))? rutina\b|\brutina (?:si|ok|bien|aplicada)\b/,function(){R.rut=true;});
+  take(/\b(enfadado|enojado|caliente|furioso|frustrado|calentito)\b/,function(){R.an='enf';}) || take(/\b(ansioso|apurado|acelerado|me apure|pegar rapido|pegue rapido)\b/,function(){R.an='tenso';}) || take(/\b(tranquilo|tranqui|relajado|calmo|sereno)\b/,function(){R.an='tranq';});
+  if(R.s!=null&&(R.s<1||R.s>20)) delete R.s;
+  if(R.c!=null&&R.c>15) delete R.c;
+  if(R.gd!=null&&(R.gd<5||R.gd>350)) delete R.gd;
+  if(R.pc!=null&&R.pc>10) delete R.pc;
+  R.found=['s','sal','gd','ge','c','p','pc','pen','an','rut','hoyo','next'].filter(function(k){return R[k]!=null;}).length;
+  return R;
+}
+function describe(n,d){
+  var a=[]; if(d.s!=null) a.push(d.s+(d.s===1?' golpe':' golpes'));
+  if(d.sal!=null) a.push(d.sal?'salida en juego':'salida fuera de juego'+(d.lado==='izq'?' por izquierda':d.lado==='der'?' por derecha':''));
+  if(d.gd!=null) a.push('a green desde '+d.gd+' m'); if(d.ge!=null) a.push(d.ge?'quedó en green':'no quedó en green');
+  if(d.c!=null) a.push('cerca '+d.c); if(d.p!=null) a.push(d.p+(d.p===1?' putt':' putts')); if(d.pc!=null) a.push(d.pc+(d.pc===1?' putt corto':' putts cortos')+' (menos de 1 m)'); if(d.pen!=null) a.push(d.pen+(d.pen===1?' penal':' penales'));
+  if(d.an!=null) a.push(ANIMO[d.an].toLowerCase()); if(d.rut!=null) a.push(d.rut?'con rutina':'sin rutina');
+  return 'Hoyo '+n+': '+(a.length?a.join(', '):'sin cambios');
+}
+function applyDictado(R){
+  var r=S.rounds[UI.roundId]; if(!r) return;
+  var n=UI.hole; if(R.hoyo!=null&&r.holes.some(function(h){return h.n===R.hoyo;})) n=R.hoyo;
+  var bq=bloqueo(r,n); if(bq!=null){ UI.hole=bq; UI.falta=bq; UI.dnote='Primero cargá el total de golpes del hoyo '+bq+'.'; render(); return; }
+  var patch={}; ['s','sal','lado','gd','ge','c','p','pc','pen','an','rut'].forEach(function(k){ if(R[k]!=null) patch[k]=R[k]; });
+  if(patch.sal===true) patch.lado=null;
+  var hh=r.holes.filter(function(x){return x.n===n;})[0];
+  if(hh&&hh.par===3){ if(patch.gd!=null&&patch.gd<60) delete patch.gd; }
+  var prev=clone(r.scores[n]||{}), changed=Object.keys(patch).length>0;
+  UI.hole=n; UI.dict=''; UI.dnote='';
+  if(changed){ setHole(r,n,patch,true); toast(describe(n,patch),{label:'Deshacer',fn:function(){ r.scores[n]=prev; touch(r); render(); }}); }
+  if(R.next){ var i=r.holes.findIndex(function(h){return h.n===UI.hole;}); if(i<r.holes.length-1){ var b2=bloqueo(r,r.holes[i+1].n);
+    if(b2==null) UI.hole=r.holes[i+1].n; else { UI.hole=b2; UI.falta=b2; UI.dnote='Para pasar de hoyo cargá el total de golpes.'; } } }
+  render();
+}
+function runDictado(){
+  var el=document.getElementById('dict'); var text=(el?el.value:UI.dict).trim(); if(!text) return;
+  var r=S.rounds[UI.roundId]; if(!r) return; var h=r.holes.filter(function(x){return x.n===UI.hole;})[0];
+  var R=parseDictado(text,h.par);
+  if(R.found){ applyDictado(R); return; }
+  UI.dict=text;
+  UI.dnote=sampleFn?'No lo entendí. <button class="link" data-a="askClaude">Interpretar con Claude</button>':'No lo entendí. Probá con algo como "5 golpes, salida en juego, al green desde 140, cerca 3".';
+  render();
+}
+function askClaude(){
+  if(!sampleFn) return; var r=S.rounds[UI.roundId]; if(!r) return;
+  var h=r.holes.filter(function(x){return x.n===UI.hole;})[0]; var text=UI.dict;
+  UI.dnote='Interpretando…'; render();
+  var prompt='Sos el intérprete de una tarjeta de golf. El jugador dictó en español lo que hizo en un hoyo. Respondé solo con un objeto JSON con estas claves, usando null en lo que no haya dicho: '+
+   '{"hoyo": número de hoyo si lo nombra, "golpes": total de golpes del hoyo, "salida_en_juego": true o false, "salida_lado": "izq" o "der", "green_metros": distancia en metros del golpe al green, "en_green": true o false, "cerca": golpes hechos desde menos de 90 metros contando los putts, "putts": número total de putts, "putts_cortos": cuántos de esos putts fueron desde menos de 1 metro, "penales": número, "animo": "tranquilo", "ansioso" (quería pegar rápido, se apuró) o "enfadado", "rutina": true si aplicó la rutina del golpe, false si no}. '+
+   'Si dice par, bogey, birdie, etc., calculá los golpes con el par del hoyo. Hoyo actual: '+h.n+'. Par del hoyo: '+h.par+'. Dictado: """'+text+'"""';
+  sampleFn.json(prompt,{modelTier:'quick'}).then(function(j){
+    var R={}; function num(v,lo,hi){ return (typeof v==='number'&&v>=lo&&v<=hi)?Math.round(v):null; }
+    if(j&&typeof j==='object'){ R.hoyo=num(j.hoyo,1,18); R.s=num(j.golpes,1,20); if(typeof j.salida_en_juego==='boolean') R.sal=j.salida_en_juego;
+      if(j.salida_lado==='izq'||j.salida_lado==='der') R.lado=j.salida_lado; R.gd=num(j.green_metros,5,350); if(typeof j.en_green==='boolean') R.ge=j.en_green;
+      R.c=num(j.cerca,0,15); R.p=num(j.putts,0,10); R.pc=num(j.putts_cortos,0,10); R.pen=num(j.penales,0,9);
+      R.an=j.animo==='tranquilo'?'tranq':j.animo==='ansioso'?'tenso':j.animo==='enfadado'?'enf':null; if(typeof j.rutina==='boolean') R.rut=j.rutina; }
+    var any=['s','sal','gd','ge','c','p','pc','pen','an','rut'].some(function(k){return R[k]!=null;});
+    if(any) applyDictado(R); else { UI.dnote='Tampoco pude interpretarlo. Cargalo con los botones.'; render(); }
+  }).catch(function(e){ UI.dnote=(e&&e.code==='not_granted')?'Sin permiso para consultar a Claude. Cargalo con los botones.':'No pude interpretarlo ahora. Cargalo con los botones.'; render(); });
+}
+var rec=null;
+function toggleMic(){
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR) return;
+  if(UI.micOn&&rec){ try{rec.stop();}catch(e){} return; }
+  try{
+    rec=new SR(); rec.lang='es-AR'; rec.interimResults=true; rec.maxAlternatives=1;
+    var finalText='';
+    rec.onresult=function(ev){ var t=''; for(var i=0;i<ev.results.length;i++){ t+=ev.results[i][0].transcript; } finalText=t; var el=document.getElementById('dict'); if(el) el.value=t; UI.dict=t; };
+    rec.onerror=function(ev){ UI.micOn=false; if(ev.error==='not-allowed'||ev.error==='service-not-allowed'){ UI.micBlocked=true; UI.dnote='El micrófono no está disponible acá. Tocá el campo y usá el micrófono del teclado del celular.'; } render(); };
+    rec.onend=function(){ UI.micOn=false; if(finalText.trim()){ UI.dict=finalText; render(); runDictado(); } else render(); };
+    rec.start(); UI.micOn=true; UI.dnote='Te escucho…'; render();
+  }catch(e){ UI.micBlocked=true; UI.dnote='El micrófono no está disponible acá. Tocá el campo y usá el micrófono del teclado del celular.'; render(); }
+}
+
+/* ---------- Cambios en la vuelta ---------- */
+function touch(r){ r.updatedAt=Date.now(); markDirty('r_'+r.id); }
+function setHole(r,n,patch,silent){
+  var d=Object.assign({},r.scores[n]||{},patch); Object.keys(d).forEach(function(k){ if(d[k]==null) delete d[k]; });
+  var hp=r.holes.filter(function(x){return x.n===n;})[0];
+  if(hp&&hp.par===3&&hp.yd&&d.gd==null&&!('gd' in patch)&&(d.s!=null||d.sal!=null)) d.gd=ydToM(hp.yd);
+  if(Object.keys(d).length) r.scores[n]=d; else delete r.scores[n];
+  touch(r); if(!silent) render();
+}
+var toastT=null;
+function toast(msg,action){
+  var el=document.getElementById('toast'); el.innerHTML='<span>'+esc(msg)+'</span>'+(action?'<button type="button">'+esc(action.label)+'</button>':'');
+  var b=el.querySelector('button'); if(b) b.onclick=function(){ action.fn(); el.classList.remove('show'); };
+  el.classList.toggle('high',UI.view==='round'); el.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(function(){ el.classList.remove('show'); },action?6000:3200);
+}
+
+/* ---------- Vistas ---------- */
+var ICON={ home:'<svg viewBox="0 0 24 24"><path d="M6 21V4l10 4-10 4"/><path d="M3 21h10"/></svg>', list:'<svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>', stats:'<svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg>', train:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1"/></svg>', hcp:'<svg viewBox="0 0 24 24"><path d="M3 6l6 6 4-4 8 9"/><path d="M15 17h6v-6"/></svg>', course:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>' };
+function tabs(){
+  var t=[['home','Inicio','home'],['history','Vueltas','list'],['train','Entrenar','train'],['stats','Estadísticas','stats'],['hcp','Handicap','hcp']];
+  return '<nav class="dock"><div class="in tabs">'+t.map(function(x){ return '<button class="tab" data-a="nav" data-v="'+x[0]+'"'+(UI.view===x[0]?' aria-current="page"':'')+'>'+ICON[x[2]]+x[1]+'</button>'; }).join('')+'</div></nav>';
+}
+function roundItem(r){
+  var t=totals(r), full=t.n===r.holes.length;
+  return '<li><button class="item" data-a="openRound" data-id="'+r.id+'"><span><span class="t">'+esc(r.courseName)+'</span><br><span class="s">'+TIPOS[tipoOf(r)]+', '+fdate(r.date)+', '+(r.status==='en_curso'?'en curso, '+t.n+' de '+r.holes.length+' hoyos':r.holes.length+' hoyos'+(full?'':' ('+t.n+' cargados)'))+(r.format==='stableford'&&t.n?', '+t.pts+' puntos':'')+'</span></span>'+
+    '<span class="g num">'+(t.n?t.g:'–')+(t.n?'<small>'+rel(t.rel)+'</small>':'')+'</span></button></li>';
+}
+function threeNums(a){
+  return '<div class="kpis"><div class="kpi"><div class="v">'+pct(a.salOk,a.salN)+'</div><div class="k">salidas en juego</div></div>'+
+   '<div class="kpi"><div class="v">'+(a.gdN?Math.round(a.gdSum/a.gdN):'–')+'<small>m</small></div><div class="k">distancia media al green</div></div>'+
+   '<div class="kpi"><div class="v">'+(a.cN?f1(a.cSum/a.cN):'–')+'</div><div class="k">golpes de cerca por hoyo'+(a.cN&&a.c2!=null?'<br><b style="color:var(--ink)">'+pct(a.c2,a.cN)+'</b> en 2 o menos':'')+'</div></div></div>';
+}
+function vHome(){
+  var rs=sortedRounds(), act=activeRound(), done=rs.filter(function(r){return r.status!=='en_curso';});
+  var html='<header class="top"><div><h1>Bajando mi handicap</h1><p class="sub">'+esc((S.profile.courses[0]||{}).name||'')+'</p></div><div style="text-align:right"><span class="sync">'+syncText()+'</span><br><button class="link" data-a="nav" data-v="course">Cancha y ajustes</button></div></header>';
+  if(act){ var t=totals(act), n=firstPending(act);
+    html+='<section class="block"><h2>Vuelta en curso</h2><p class="muted">'+esc(act.courseName)+', '+fdate(act.date)+'. '+(t.n?'Llevás '+t.g+' golpes en '+t.n+(t.n===1?' hoyo':' hoyos')+' ('+rel(t.rel)+').':'Todavía sin hoyos cargados.')+'</p>'+
+      '<div class="stack" style="margin-top:12px"><button class="btn flag big" data-a="resume" data-id="'+act.id+'">Seguir en el hoyo '+n+'</button><button class="btn quiet" style="width:100%" data-a="openRound" data-id="'+act.id+'">Ver la tarjeta</button></div></section>';
+  } else {
+    html+='<button class="btn primary big" data-a="newRound" style="margin-bottom:12px">Empezar una vuelta</button>';
+  }
+  var last=done.slice(0,5), a=myNums(last);
+  if(a.salN||a.gdN||a.cN){ html+='<section style="margin:18px 0 14px"><h2 style="margin-bottom:8px">Tus tres números</h2>'+threeNums(a)+'<p class="small muted" style="margin-top:6px">Sobre '+(last.length===1?'tu última vuelta':'tus últimas '+last.length+' vueltas')+'.</p></section>'; }
+  else { html+='<div class="note">Cargá tu primera vuelta y acá vas a ver tus tres números: salidas en juego, distancia al green y golpes de cerca.</div>'; }
+  if(rs.length){ html+='<section class="block"><div class="row"><h2>Últimas vueltas</h2>'+(rs.length>4?'<button class="link" data-a="nav" data-v="history">Ver todas</button>':'')+'</div><ul class="list">'+rs.slice(0,4).map(roundItem).join('')+'</ul></section>'; }
+  return html+tabs();
+}
+function vHistory(){
+  var rs=sortedRounds();
+  var html='<header class="top"><h1>Vueltas</h1><button class="btn primary" data-a="newRound">Nueva vuelta</button></header>';
+  if(!rs.length) html+='<div class="empty"><h2>Todavía no hay vueltas</h2><p>Empezá una y la vas a encontrar acá, con su tarjeta completa.</p></div>';
+  else html+='<section class="block"><ul class="list">'+rs.map(roundItem).join('')+'</ul></section>';
+  return html+tabs();
+}
+function chip(label,pressed,attrs,cls){ return '<button class="chip'+(cls?' '+cls:'')+'" aria-pressed="'+(pressed?'true':'false')+'" '+attrs+'>'+label+'</button>'; }
+function vSetup(){
+  var su=UI.setup, c=courseById(su.courseId)||S.profile.courses[0];
+  var ydH=c.holes.reduce(function(s,h){return s+(h.ydH||0);},0), ydD=c.holes.reduce(function(s,h){return s+(h.ydD||0);},0);
+  var nine=c.holes.length>=18, first=(nine&&su.part==='h10')?10:1;
+  var html='<header class="bar"><button class="link" data-a="nav" data-v="home">Cancelar</button><h1>Nueva vuelta</h1><span></span></header>';
+  html+='<section class="block"><h3>Cancha</h3><div class="chips">'+S.profile.courses.map(function(x){return chip(esc(x.name),x.id===c.id,'data-a="su" data-k="courseId" data-v="'+x.id+'"');}).join('')+'</div></section>';
+  html+='<section class="block"><h3>Salidas</h3><div class="chips">'+chip('Caballeros, '+ydH.toLocaleString('es-AR')+' yd',su.tee==='H','data-a="su" data-k="tee" data-v="H"')+chip('Damas, '+ydD.toLocaleString('es-AR')+' yd',su.tee==='D','data-a="su" data-k="tee" data-v="D"')+'</div></section>';
+  if(nine) html+='<section class="block"><h3>¿De qué hoyo salís?</h3><div class="chips">'+chip('Hoyo 1',first===1,'data-a="su" data-k="part" data-v="h1"')+chip('Hoyo 10',first===10,'data-a="su" data-k="part" data-v="h10"')+'</div><p class="small muted" style="margin-top:8px">'+(first===10?'Jugás del 10 al 18 y seguís del 1 al 9.':'Jugás del 1 al 18.')+' Podés terminar la vuelta en cualquier hoyo.</p></section>';
+  html+='<section class="block"><h3>Tipo de vuelta</h3><div class="chips">'+TIPO_ORD.map(function(k){return chip(TIPOS[k],su.tipo===k,'data-a="su" data-k="tipo" data-v="'+k+'"');}).join('')+'</div><p class="small muted" style="margin-top:8px">'+(su.tipo==='torneo'?'Tarjeta para presentar. Se cuenta aparte en tus estadísticas.':su.tipo==='practica'?'Vuelta de entrenamiento: podés tirar bolas extra o probar golpes. Se cuenta aparte.':'Salida con amigos, sin presentar tarjeta. Se cuenta aparte del torneo.')+'</p></section>';
+  html+='<section class="block"><h3>Formato</h3><div class="chips">'+chip('Por golpes',su.format==='golpes','data-a="su" data-k="format" data-v="golpes"')+chip('Stableford',su.format==='stableford','data-a="su" data-k="format" data-v="stableford"')+'</div></section>';
+  html+='<section class="block"><h3>Tu handicap de juego</h3><div class="row" style="justify-content:flex-start"><input class="narrow" type="number" inputmode="numeric" min="0" max="54" data-c="suHcp" value="'+(su.hcp==null?'':su.hcp)+'" aria-label="Tu handicap de juego"><p class="small muted">Con esto calculo tu par en cada hoyo y el resultado neto.</p></div></section>';
+  html+='<section class="block"><h3>Compañeros</h3>'+(su.players.length?'<div class="stack">'+su.players.map(function(p,i){
+    return '<div class="row"><input type="text" placeholder="Nombre" data-c="suP" data-i="'+i+'" data-k="name" value="'+esc(p.name)+'" aria-label="Nombre del compañero '+(i+1)+'"><input class="narrow" type="number" inputmode="numeric" min="0" max="54" placeholder="Hcp" data-c="suP" data-i="'+i+'" data-k="hcp" value="'+(p.hcp==null?'':p.hcp)+'" aria-label="Handicap del compañero '+(i+1)+'"><button class="link" data-a="suDelP" data-i="'+i+'">Quitar</button></div>'; }).join('')+'</div>':'<p class="small muted">Podés anotar el score de hasta tres compañeros.</p>')+
+    (su.players.length<3?'<button class="btn quiet" style="margin-top:10px" data-a="suAddP">Sumar compañero</button>':'')+'</section>';
+  html+='<section class="block"><h3>Fecha</h3><input type="date" data-c="suDate" value="'+esc(su.date)+'" aria-label="Fecha de la vuelta"></section>';
+  html+='<button class="btn primary big" data-a="start">Empezar en el hoyo '+first+'</button>';
+  return html;
+}
+function stepper(val,attrs,sm,label){
+  return '<div class="stepper'+(sm?' sm':'')+'"><button data-a="dec" '+attrs+' aria-label="Restar uno a '+label+'">−</button><output class="'+(val==null?'none':'')+'" aria-label="'+label+'">'+(val==null?'–':val)+'</output><button data-a="inc" '+attrs+' aria-label="Sumar uno a '+label+'">+</button></div>';
+}
+function vRound(){
+  var r=S.rounds[UI.roundId]; if(!r){ UI.view='home'; return vHome(); }
+  var hs=r.holes, idx=hs.findIndex(function(h){return h.n===UI.hole;}); if(idx<0){ idx=0; UI.hole=hs[0].n; }
+  var h=hs[idx], d=r.scores[h.n]||{}, rc=recvMap(hs,r.hcp), got=rc[h.n]||0, pp=h.par+got, t=totals(r);
+  var html='<header class="bar"><button class="link" data-a="nav" data-v="home">Salir</button><h1>'+esc(r.courseName)+'</h1><button class="link" data-a="card">Tarjeta</button></header>';
+  var fpi=enCurso(r)?hs.findIndex(function(x){return sinGolpes(r,x.n);}):-1;
+  var fl=(UI.falta===h.n||d.s!=null)?faltan(r,h.n):[]; function st(k){ return '<section class="stat'+(fl.indexOf(k)>=0?' falta':'')+'">'; }
+  html+='<div class="strip" id="strip">'+hs.map(function(x,xi){ var s=(r.scores[x.n]||{}).s, lk=fpi>=0&&xi>fpi, inc=s!=null&&faltan(r,x.n).length>0; return '<button class="hp'+(lk?' locked':'')+(inc?' inc':'')+'" data-a="goto" data-n="'+x.n+'"'+(x.n===h.n?' aria-current="true"':'')+' aria-label="Hoyo '+x.n+(s!=null?', '+s+' golpes':'')+(lk?', bloqueado':'')+(inc?', falta info':'')+'"><span class="n">'+x.n+'</span><span class="v">'+mk(s,x.par)+'</span></button>'; }).join('')+'</div>';
+  html+='<section class="hole"><div class="big"><small>Hoyo</small>'+h.n+'</div><div><dl><div><dt>Par</dt><dd>'+h.par+'</dd></div><div><dt>Yardas</dt><dd>'+(h.yd||'–')+'</dd></div><div><dt>Handicap</dt><dd>'+h.si+'</dd></div></dl>'+
+    '<p class="pp">'+(r.hcp?(got?'Recibís '+got+(got===1?' golpe':' golpes')+': <b>tu par acá es '+pp+'</b>.':'Sin golpes de ventaja: <b>tu par acá es '+pp+'</b>.'):'Sin handicap cargado en esta vuelta.')+'</p></div></section>';
+  // golpes
+  var line=''; if(d.s!=null){ line='<b>'+scoreName(d.s-h.par)+'</b>'+(r.hcp?', neto '+rel(d.s-pp):'')+(r.format==='stableford'?', '+Math.max(0,2+pp-d.s)+' puntos':''); }
+  html+=st('golpes')+'<div class="row"><div><h3>Golpes</h3><p class="hint">'+(t.n?'Vas '+rel(t.rel)+' en '+t.n+(t.n===1?' hoyo':' hoyos'):'Total del hoyo')+'</p></div>'+stepper(d.s,'data-f="s"',false,'golpes')+'</div>'+(line?'<p class="scoreline">'+line+'</p>':'')+'</section>';
+  html+=gpsSection(r,h,d);
+  // salida
+  { var sv=d.sal===true?'ok':d.sal===false?(d.lado||'no'):null, p3=h.par===3;
+    html+=st('salida')+'<h3>Salida</h3><p class="hint">'+(p3?'Par 3: ¿hacia dónde fue la salida?':'¿Quedó en una posición jugable?')+'</p><div class="chips four">'+chip(p3?'Al centro':'En juego',sv==='ok','data-a="sal" data-v="ok"')+chip('Izquierda',sv==='izq','data-a="sal" data-v="izq"','bad')+chip('Derecha',sv==='der','data-a="sal" data-v="der"','bad')+chip('Penal',sv==='pen','data-a="sal" data-v="pen"','pen')+'</div></section>'; }
+  // a green
+  var quick=h.par===3&&h.yd?[ydToM(h.yd)]:[60,80,100,120,140,160,180];
+  html+=st('a green')+'<h3>A green</h3><p class="hint">'+(h.par===3?'Par 3: la salida es tu golpe al green.':'¿Desde qué distancia pegaste el golpe al green?')+'</p>'+
+    '<div class="dist"><button data-a="gdStep" data-v="-5" aria-label="Restar 5 metros">−5</button><input id="gd" type="number" inputmode="numeric" min="1" max="350" data-c="gd" value="'+(d.gd==null?'':d.gd)+'" placeholder="–" aria-label="Distancia al green en metros"><span class="u">m</span><button data-a="gdStep" data-v="5" aria-label="Sumar 5 metros">+5</button></div>'+
+    '<div class="chips scroll" id="gdchips">'+quick.map(function(v){return chip(v+(h.par===3?' m, la medida del hoyo':''),d.gd===v,'data-a="gd" data-v="'+v+'"');}).join('')+'</div>'+
+    '<div class="chips">'+chip('Quedó en green',d.ge===true,'data-a="ge" data-v="1"')+chip('No quedó',d.ge===false,'data-a="ge" data-v="0"','bad')+'</div></section>';
+  // cerca
+  var warn=(d.c!=null&&d.s!=null&&d.c>d.s)?'<p class="scoreline" style="color:var(--red)">Cerca no puede superar el total de golpes.</p>':(d.c!=null&&d.s!=null?'<p class="scoreline">'+(d.s-d.c)+' largos y '+d.c+' de cerca</p>':'');
+  html+=st('cerca')+'<div class="row"><div><h3>Cerca</h3><p class="hint">Golpes desde menos de 90 m, contando los putts</p></div>'+stepper(d.c,'data-f="c"',false,'golpes de cerca')+'</div>'+warn+'</section>';
+  // detalle opcional
+  var open=UI.more||d.pc!=null||d.pen!=null;
+  var pline=(d.pc!=null&&d.p!=null)?(d.pc>d.p?'<p class="scoreline" style="color:var(--red);margin:0 0 6px">Los cortos no pueden superar el total de putts.</p>':'<p class="scoreline" style="margin:0 0 6px">'+d.pc+(d.pc===1?' corto':' cortos')+' y '+(d.p-d.pc)+(d.p-d.pc===1?' largo':' largos')+'</p>'):'';
+  var pwarn=(d.p!=null&&d.c!=null&&d.p>d.c)?'<p class="scoreline" style="color:var(--red)">Los putts no pueden superar los golpes de cerca.</p>':'';
+  html+='<section class="stat"><div class="row"><div><h3>Putts</h3><p class="hint">Golpes con el putter en el green</p></div>'+stepper(d.p,'data-f="p"',false,'putts')+'</div>'+pwarn+'</section>';
+  html+='<details class="more"'+(open?' open':'')+' id="more"><summary>Putts cortos y penales</summary><div class="stat" style="margin:0"><div class="mini"><span>De esos, cortos<br><span class="small muted">desde menos de 1 m</span></span>'+stepper(d.pc,'data-f="pc"',true,'putts cortos, desde menos de 1 metro')+'</div>'+pline+'<div class="mini"><span>Golpes de penal</span>'+stepper(d.pen,'data-f="pen"',true,'penales')+'</div></div></details>';
+  // cierre del hoyo: ánimo y rutina
+  html+=st(fl.indexOf('cómo estás')>=0?'cómo estás':'rutina')+'<h3>Cierre del hoyo</h3><p class="hint">¿Cómo estás?</p><div class="chips" style="margin-top:8px">'+
+    chip('Tranquilo',d.an==='tranq','data-a="an" data-v="tranq"')+chip('Ansioso',d.an==='tenso','data-a="an" data-v="tenso"','pen')+chip('Enfadado',d.an==='enf','data-a="an" data-v="enf"','bad')+'</div><p class="small muted" style="margin-top:6px">Ansioso: querías pegar rápido.</p>'+
+    '<p class="hint" style="margin-top:12px">¿Aplicaste la rutina del golpe?</p><div class="chips" style="margin-top:8px">'+chip('Sí, la apliqué',d.rut===true,'data-a="rut" data-v="1"')+chip('No',d.rut===false,'data-a="rut" data-v="0"','bad')+'</div></section>';
+  // compañeros
+  if((r.players||[]).length){ html+='<section class="stat"><h3>Compañeros</h3>'+r.players.map(function(p){ var v=((r.others||{})[p.id]||{})[h.n]; return '<div class="mini"><span>'+esc(p.name||'Compañero')+'</span>'+stepper(v,'data-f="o" data-pid="'+p.id+'"',true,'golpes de '+esc(p.name||'compañero'))+'</div>'; }).join('')+'</section>'; }
+  // terminar en 9 hoyos
+  var nPlayed=hs.filter(function(x){return (r.scores[x.n]||{}).s!=null;}).length;
+  if(enCurso(r)&&nPlayed>0&&nPlayed<hs.length){
+    html+='<section class="block" style="margin-top:12px"><h3>¿Cortaste acá?</h3><p class="small muted" style="margin-bottom:10px">Guarda la vuelta con los '+nPlayed+(nPlayed===1?' hoyo jugado':' hoyos jugados')+'. Los hoyos sin golpes se quitan.</p><button class="btn quiet" style="width:100%" data-a="finish">Terminar la vuelta con '+nPlayed+(nPlayed===1?' hoyo':' hoyos')+'</button></section>';
+  }
+  // barra inferior
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition, last=idx===hs.length-1;
+  html+='<div class="dock"><div class="in"><div class="dict">'+((SR&&!UI.micBlocked)?'<button class="mic'+(UI.micOn?' on':'')+'" data-a="mic" aria-label="'+(UI.micOn?'Dejar de escuchar':'Dictar el hoyo')+'"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>':'<span></span>')+
+    '<input id="dict" type="text" enterkeyhint="send" autocomplete="off" placeholder="Dictá o escribí el hoyo" value="'+esc(UI.dict)+'" aria-label="Dictá o escribí el hoyo"><button class="btn primary" data-a="dictar">Cargar</button></div>'+
+    (function(){ var fc=faltan(r,h.n), nt=UI.dnote||(!Object.keys(d).length?'Por ejemplo: 5 golpes, salida en juego, green desde 140, cerca 3':(d.s==null&&enCurso(r)&&!last?'Para pasar al hoyo '+hs[idx+1].n+' cargá el total de golpes.':(fc.length?'Falta info: '+lista(fc)+'. Podés completarla después.':'')));
+      return nt?'<p class="dnote">'+nt+'</p>':''; })()+
+    '<div class="nav2"><button class="btn quiet" data-a="prev"'+(idx===0?' disabled':'')+'>Anterior</button><button class="btn '+(last?'flag':(enCurso(r)&&d.s==null?'quiet':'primary'))+'" data-a="'+(last?'card':'next')+'">'+(last?'Ver la tarjeta':'Hoyo '+hs[idx+1].n)+'</button></div></div></div>';
+  return html;
+}
+function cardTable(r,part,label,showTotal){
+  var rc=recvMap(r.holes,r.hcp);
+  function row(name,fn,tot,cls){ return '<tr><th scope="row">'+name+'</th>'+part.map(function(h){return '<td'+(cls?' class="'+cls+'"':'')+'>'+fn(h)+'</td>';}).join('')+'<td class="tot">'+tot+'</td></tr>'; }
+  function sum(fn){ var s=0,n=0; part.forEach(function(h){ var v=fn(h); if(v!=null){s+=v;n++;} }); return n?s:null; }
+  function show(v){ return v==null?'':v; }
+  var sc=function(h){return r.scores[h.n]||{};};
+  var g=sum(function(h){return sc(h).s;}), salN=0, salOk=0, gdS=0, gdN=0;
+  part.forEach(function(h){ var d=sc(h); if(h.par>3&&d.sal!=null){salN++; if(d.sal)salOk++;} if(d.gd!=null){gdS+=d.gd;gdN++;} });
+  var html='<div class="cardwrap"><table class="sc"><thead><tr><th scope="row">Hoyo</th>'+part.map(function(h){return '<th>'+h.n+'</th>';}).join('')+'<th class="tot">'+label+'</th></tr></thead><tbody>';
+  html+=row('Yardas',function(h){return h.yd||'';},show(sum(function(h){return h.yd;})));
+  html+=row('Par',function(h){return h.par;},sum(function(h){return h.par;}));
+  html+=row('Golpes',function(h){return sc(h).s==null?'':mk(sc(h).s,h.par);},show(g));
+  if(r.format==='stableford') html+=row('Puntos',function(h){var s=sc(h).s;return s==null?'':Math.max(0,2+h.par+(rc[h.n]||0)-s);},show(sum(function(h){var s=sc(h).s;return s==null?null:Math.max(0,2+h.par+(rc[h.n]||0)-s);})));
+  else if(r.hcp) html+=row('Neto',function(h){var s=sc(h).s;return s==null?'':s-(rc[h.n]||0);},show(sum(function(h){var s=sc(h).s;return s==null?null:s-(rc[h.n]||0);})));
+  html+=row('Salida',function(h){var d=sc(h);if(d.sal==null) return ''; if(d.sal) return '<span class="y" aria-label="'+(h.par===3?'al centro':'en juego')+'">✓</span>';
+    return d.lado==='izq'?'<span class="x" aria-label="izquierda">←</span>':d.lado==='der'?'<span class="x" aria-label="derecha">→</span>':d.lado==='pen'?'<span class="x" aria-label="penal">P</span>':'<span class="x" aria-label="fuera de juego">✗</span>';},salN?salOk+'/'+salN:'');
+  html+=row('A green',function(h){var d=sc(h);return d.gd==null?'':d.gd;},gdN?Math.round(gdS/gdN):'');
+  html+=row('Cerca',function(h){return show(sc(h).c);},show(sum(function(h){return sc(h).c;})));
+  if(r.holes.some(function(h){return sc(h).p!=null;})) html+=row('Putts',function(h){return show(sc(h).p);},show(sum(function(h){return sc(h).p;})));
+  if(r.holes.some(function(h){return sc(h).pc!=null;})) html+=row('Putts &lt;1 m',function(h){return show(sc(h).pc);},show(sum(function(h){return sc(h).pc;})));
+  return html+'</tbody></table></div>';
+}
+function vCard(){
+  var r=S.rounds[UI.roundId]; if(!r){ UI.view='history'; return vHistory(); }
+  var t=totals(r), a=myNums([r]), front=r.holes.filter(function(h){return h.n<=9;}), back=r.holes.filter(function(h){return h.n>9;});
+  var cS=0,lS=0,cN=0; r.holes.forEach(function(h){var d=r.scores[h.n]||{}; if(d.c!=null&&d.s!=null){cS+=d.c;lS+=d.s-d.c;cN++;}});
+  var html='<header class="bar"><button class="link" data-a="nav" data-v="'+(r.status==='en_curso'?'home':'history')+'">Volver</button><h1>Tarjeta</h1><span></span></header>';
+  html+='<p class="muted" style="margin-bottom:8px">'+esc(r.courseName)+', '+fdate(r.date,true)+'</p>';
+  html+='<div class="chips" style="margin-bottom:12px" role="group" aria-label="Tipo de vuelta">'+TIPO_ORD.map(function(k){return chip(TIPOS[k],tipoOf(r)===k,'data-a="setTipo" data-v="'+k+'"');}).join('')+'</div>';
+  html+='<div class="kpis '+(r.hcp||r.format==='stableford'?'':'two')+'" style="margin-bottom:12px"><div class="kpi"><div class="v">'+(t.n?t.g:'–')+'</div><div class="k">golpes'+(t.n<r.holes.length?' en '+t.n+(t.n===1?' hoyo':' hoyos'):'')+'</div></div><div class="kpi"><div class="v">'+(t.n?rel(t.rel):'–')+'</div><div class="k">contra el par</div></div>'+
+    (r.format==='stableford'?'<div class="kpi"><div class="v">'+t.pts+'</div><div class="k">puntos Stableford</div></div>':(r.hcp?'<div class="kpi"><div class="v">'+(t.n?rel(t.netRel):'–')+'</div><div class="k">neto, con handicap '+r.hcp+'</div></div>':''))+'</div>';
+  if(front.length) html+=cardTable(r,front,'Ida');
+  if(back.length) html+=cardTable(r,back,'Vta');
+  html+='<h2 style="margin:16px 0 8px">Tus tres números</h2>'+threeNums(a);
+  if(cN){ var tot=cS+lS; html+='<section class="block" style="margin-top:12px"><h3>Dónde se fueron los golpes</h3><div class="split"><div class="a" style="width:'+Math.round(100*lS/tot)+'%">'+lS+'</div><div class="b" style="width:'+Math.round(100*cS/tot)+'%">'+cS+'</div></div><div class="legend"><span>Largos, de más de 90 m</span><span>Cerca, con putts ('+pct(cS,tot)+')</span></div>'+(function(){ var L=lossSplit([r]); return L.n?'<p style="margin-top:10px">Contra el par: <b>'+rel(L.long)+'</b> en el juego largo y <b>'+rel(L.cerca)+'</b> a menos de 90 m'+(L.n<t.n?', en los '+L.n+' hoyos con Cerca cargado':'')+'.</p>':''; })()+'</section>'; }
+  if((r.players||[]).length){ var rows=[{name:'Vos',t:t}].concat(r.players.map(function(p){return {name:p.name||'Compañero',t:totals(r,p.id)};})).filter(function(x){return x.t.n;});
+    rows.sort(function(x,y){ return r.format==='stableford'?y.t.pts-x.t.pts:x.t.netRel-y.t.netRel; });
+    if(rows.length>1) html+='<section class="block" style="margin-top:12px"><h3>Posiciones</h3><table class="tbl"><thead><tr><th>Jugador</th><th>Hoyos</th><th>Golpes</th><th>Neto</th><th>Puntos</th></tr></thead><tbody>'+rows.map(function(x){return '<tr><td>'+esc(x.name)+'</td><td>'+x.t.n+'</td><td>'+x.t.g+'</td><td>'+rel(x.t.netRel)+'</td><td>'+x.t.pts+'</td></tr>';}).join('')+'</tbody></table></section>'; }
+  html+='<div class="stack" style="margin-top:16px">';
+  if(r.status==='en_curso') html+='<button class="btn primary big" data-a="finish">'+(t.n&&t.n<r.holes.length?'Terminar con '+t.n+(t.n===1?' hoyo':' hoyos'):'Terminar la vuelta')+'</button>'+(t.n&&t.n<r.holes.length?'<p class="small muted" style="text-align:center">Los hoyos sin cargar se quitan de esta vuelta.</p>':'')+'<button class="btn quiet" style="width:100%" data-a="resume" data-id="'+r.id+'">Seguir cargando hoyos</button>';
+  else html+='<button class="btn '+(reflDone(r)?'quiet':'flag big')+'" style="width:100%" data-a="reflect">'+(reflDone(r)?'Ver o editar la reflexión':'Reflexionar sobre esta vuelta')+'</button><button class="btn quiet" style="width:100%" data-a="editRound">Corregir hoyos</button>';
+  html+='<button class="btn danger" style="width:100%" data-a="delRound">'+(UI.confirmDel===r.id?'Tocá de nuevo para borrarla':'Borrar esta vuelta')+'</button></div>';
+  return html+(r.status==='en_curso'?'':tabs());
+}
+
+
+/* ---------- Diagnóstico (sistema de golpes) ---------- */
+// Con los tres datos de la tarjeta se reparte lo perdido contra el par:
+// referencia de cerca = 2 golpes por hoyo (3 si el golpe al green fue de menos de 90 m); el resto del par es juego largo.
+function lossSplit(rounds){
+  var L={n:0,long:0,cerca:0,holes:0,dis:0,disCost:0};
+  rounds.forEach(function(r){ r.holes.forEach(function(h){ var d=r.scores[h.n]; if(!d||d.s==null) return;
+    L.holes++; var x=d.s-h.par; if(x>=2){ L.dis++; L.disCost+=x-1; }
+    if(d.c==null||d.c>d.s) return;
+    var refC=(d.gd!=null&&d.gd<90)?3:2; if(refC>h.par) refC=h.par;
+    L.n++; L.cerca+=d.c-refC; L.long+=(d.s-d.c)-(h.par-refC); }); });
+  return L;
+}
+function levelOf(rounds,A){
+  var h=S.profile.hcp; if(h!=null&&h>0) return {v:h,src:'tu handicap '+h};
+  for(var i=0;i<rounds.length;i++){ if(rounds[i].hcp>0) return {v:rounds[i].hcp,src:'tu handicap '+rounds[i].hcp}; }
+  if(A&&A.holes){ var v=Math.round(18*A.rel/A.holes); return {v:v,src:'tu promedio de '+rel(v)+' por vuelta'}; }
+  return null;
+}
+function vDiag(rs,A){
+  var L=lossSplit(rs), html='<section class="block" style="margin-top:12px"><h2 style="margin-bottom:6px">Diagnóstico</h2>';
+  var withData=rs.filter(function(r){ return r.holes.some(function(h){ var d=r.scores[h.n]; return d&&d.c!=null; }); }).length;
+  html+='<p class="small muted" style="margin-bottom:10px">Sobre '+(withData===1?'1 tarjeta':withData+' tarjetas')+' con los tres datos.'+(withData<3?' Con 3 o 4 el diagnóstico ya es confiable.':'')+'</p>';
+  if(L.n){ var k=18/L.n, lg=L.long*k, ce=L.cerca*k, tot=lg+ce;
+    html+='<p style="margin-bottom:4px">Por vuelta perdés <b>'+relF(tot)+'</b> golpes contra el par: <b>'+relF(lg)+'</b> en el juego largo y <b>'+relF(ce)+'</b> a menos de 90 m.</p>';
+    if(lg>0&&ce>0){ var pa=Math.round(100*lg/tot), pb=100-pa; html+='<div class="split"><div class="a" style="width:'+pa+'%">'+pa+'%</div><div class="b" style="width:'+pb+'%">'+pb+'%</div></div><div class="legend"><span>Juego largo</span><span>Cerca, con putts</span></div>'; }
+    html+='<p class="small muted" style="margin-top:8px">Referencia del video: quien ronda los 90 golpes pierde unos 15,5 contra un scratch, y más de 6 de esos son a menos de 90 m.</p>';
+  } else { html+='<p style="margin-bottom:4px">Cargá Cerca en tus hoyos para ver cuánto perdés en el juego largo y cuánto a menos de 90 m.</p>'; }
+  // las tres fugas, en golpes por vuelta
+  var rows=[], rounds18=L.holes/18;
+  if(A.sal.okN&&A.sal.noN){ var per=A.sal.noN/rounds18, extra=A.sal.noRel/A.sal.noN-A.sal.okRel/A.sal.okN;
+    rows.push({k:'sal',name:'Salidas fuera de juego',q:f1(per)+' por vuelta',cost:per*extra}); }
+  else if(A.sal.n){ rows.push({k:'sal',name:'Salidas fuera de juego',q:f1((A.sal.n-A.sal.ok)/rounds18)+' por vuelta',cost:null}); }
+  if(L.holes) rows.push({k:'dis',name:'Desastres, doble bogey o peor',q:f1(L.dis/rounds18)+' por vuelta',cost:L.disCost/rounds18});
+  if(L.n) rows.push({k:'cer',name:'Golpes de cerca, a menos de 90 m',q:f1(A.c.n?A.c.sum/A.c.n:0)+' por hoyo',cost:L.cerca*18/L.n});
+  if(rows.length){ html+='<table class="tbl" style="margin-top:12px"><thead><tr><th>Dónde se van</th><th>Cuánto</th><th>Te cuesta por vuelta</th></tr></thead><tbody>'+rows.map(function(x){ return '<tr><td style="white-space:normal">'+x.name+'</td><td>'+x.q+'</td><td>'+(x.cost==null?'–':(x.cost>0?f1(x.cost)+' golpes':'nada'))+'</td></tr>'; }).join('')+'</tbody></table>'+
+    '<p class="small muted" style="margin-top:6px">Son aproximaciones con tus tres datos y se pisan entre sí: un desastre suele empezar en una mala salida. No es el cálculo completo de strokes gained.</p>'; }
+  // prioridad
+  var lv=levelOf(rs,A), top=rows.filter(function(x){return x.cost!=null&&x.cost>0;}).sort(function(a,b){return b.cost-a.cost;})[0];
+  var PRI={sal:'mantener la bola en juego desde el tee, con un palo seguro como un híbrido',dis:'evitar los desastres: apuntar al centro del green y dejar margen de error',cer:'el juego corto, de menos de 90 m, y asegurar los putts de 1 a 2 metros'};
+  if(lv){ var key=lv.v>30?'sal':lv.v>=15?'dis':'cer';
+    html+='<div class="note" style="margin:12px 0 0"><b>Tu prioridad.</b> Por '+lv.src+', el video pone el foco en '+PRI[key]+'.'+
+      (top?(top.k===key?' Tus datos coinciden: es también tu fuga más grande.':' En tus tarjetas, la fuga más grande hoy es otra: '+top.name.toLowerCase()+' ('+f1(top.cost)+' golpes por vuelta).'):'')+'</div>'; }
+  return html+'</section>';
+}
+
+/* ---------- Estadísticas ---------- */
+var BANDS=[[0,90,'Menos de 90'],[90,120,'90 a 119'],[120,150,'120 a 149'],[150,180,'150 a 179'],[180,999,'180 o más']];
+function aggregate(rounds){
+  var A={holes:0,rel:0,netRel:0,netN:0,types:{b:0,p:0,bo:0,d:0,t:0},byPar:{3:{n:0,rel:0},4:{n:0,rel:0},5:{n:0,rel:0}},
+    sal:{n:0,ok:0,izq:0,der:0,pen:0,okRel:0,okN:0,noRel:0,noN:0},s3:{n:0,ok:0,izq:0,der:0,pen:0},gd:{n:0,sum:0},bands:BANDS.map(function(b){return {label:b[2],n:0,geN:0,geOk:0,rel:0,relN:0};}),
+    c:{n:0,sum:0,strokes:0,dist:{}},putts:{n:0,sum:0,bothN:0,cortos:0,largos:0},ap:{n:0,sum:0,putts:0,dist:{}},drv:{n:0,sum:0,max:0},pen:0,byHole:{},series:[]};
+  var count={}; rounds.forEach(function(r){count[r.courseId]=(count[r.courseId]||0)+1;});
+  var main=Object.keys(count).sort(function(a,b){return count[b]-count[a];})[0]; A.mainCourse=main;
+  rounds.forEach(function(r){
+    var rc=recvMap(r.holes,r.hcp), t=totals(r); if(t.n) A.series.push({date:r.date,rel:t.rel,n:t.n,g:t.g,full:t.n===r.holes.length,holes:r.holes.length});
+    r.holes.forEach(function(h){ var d=r.scores[h.n]; if(!d) return;
+      if(d.s!=null){ var x=d.s-h.par; A.holes++; A.rel+=x; if(r.hcp){A.netRel+=x-(rc[h.n]||0);A.netN++;}
+        if(x<=-1)A.types.b++; else if(x===0)A.types.p++; else if(x===1)A.types.bo++; else if(x===2)A.types.d++; else A.types.t++;
+        if(A.byPar[h.par]){A.byPar[h.par].n++;A.byPar[h.par].rel+=x;}
+        if(r.courseId===main){ var bh=A.byHole[h.n]||(A.byHole[h.n]={n:0,s:0,rel:0,net:0,par:h.par}); bh.n++; bh.s+=d.s; bh.rel+=x; bh.net+=x-(rc[h.n]||0); }
+        if(h.par>3&&d.sal!=null){ if(d.sal){A.sal.okRel+=x;A.sal.okN++;} else {A.sal.noRel+=x;A.sal.noN++;} }
+        if(d.c!=null){A.c.strokes+=d.s;}
+      }
+      if(h.par===3&&d.sal!=null){ A.s3.n++; if(d.sal)A.s3.ok++; else if(d.lado==='izq')A.s3.izq++; else if(d.lado==='der')A.s3.der++; else if(d.lado==='pen')A.s3.pen++; }
+      if(h.par>3&&d.sal!=null){ A.sal.n++; if(d.sal)A.sal.ok++; else if(d.lado==='izq')A.sal.izq++; else if(d.lado==='der')A.sal.der++; else if(d.lado==='pen')A.sal.pen++; }
+      if(d.gd!=null){ A.gd.n++; A.gd.sum+=d.gd; for(var i=0;i<BANDS.length;i++){ if(d.gd>=BANDS[i][0]&&d.gd<BANDS[i][1]){ var b=A.bands[i]; b.n++; if(d.ge!=null){b.geN++; if(d.ge)b.geOk++;} if(d.s!=null){b.rel+=d.s-h.par;b.relN++;} break; } } }
+      if(d.c!=null){ A.c.n++; A.c.sum+=d.c; var k=d.c>=5?'5+':String(d.c); A.c.dist[k]=(A.c.dist[k]||0)+1; }
+      if(d.p!=null){A.putts.n++;A.putts.sum+=d.p;}
+      if(h.par>3&&d.pts&&d.pts.length>=2){ var dv=hav(d.pts[0],d.pts[1]); if(dv>=20&&dv<=400){ A.drv.n++; A.drv.sum+=dv; if(dv>A.drv.max) A.drv.max=dv; } }
+      if(d.c!=null&&d.p!=null&&d.p<=d.c){ var ap=d.c-d.p; A.ap.n++; A.ap.sum+=ap; A.ap.putts+=d.p; var ak=ap>=3?'3+':String(ap); A.ap.dist[ak]=(A.ap.dist[ak]||0)+1; }
+      if(d.p!=null&&d.pc!=null&&d.pc<=d.p){A.putts.bothN++;A.putts.cortos+=d.pc;A.putts.largos+=d.p-d.pc;}
+      if(d.pen) A.pen+=d.pen;
+    });
+  });
+  A.series.sort(function(a,b){return a.date<b.date?-1:1;});
+  return A;
+}
+function trendSvg(series){
+  var s=series.slice(-12); if(s.length<2) return '';
+  var W=320,H=130,pl=30,pr=10,pt=12,pb=22, vals=s.map(function(x){return x.rel*18/x.n;});
+  var mn=Math.min.apply(null,vals), mx=Math.max.apply(null,vals); if(mx-mn<4){mx+=2;mn-=2;}
+  function X(i){return pl+(W-pl-pr)*i/(s.length-1);} function Y(v){return pt+(H-pt-pb)*(mx-v)/(mx-mn);}
+  var path=vals.map(function(v,i){return (i?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1);}).join(' ');
+  var g='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Evolución del score contra el par, llevado a 18 hoyos" style="width:100%;height:auto;display:block">';
+  [mx,(mx+mn)/2,mn].forEach(function(v){ g+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" style="stroke:var(--line);stroke-width:1"/><text x="'+(pl-6)+'" y="'+(Y(v)+4)+'" text-anchor="end" style="font-size:11px;fill:var(--ink2)">'+(v>0?'+':'')+Math.round(v)+'</text>'; });
+  g+='<path d="'+path+'" style="fill:none;stroke:var(--green);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round"/>';
+  vals.forEach(function(v,i){ g+='<circle cx="'+X(i)+'" cy="'+Y(v)+'" r="3.5" style="fill:var(--surface);stroke:var(--green);stroke-width:2"/>'; });
+  g+='<text x="'+pl+'" y="'+(H-5)+'" style="font-size:11px;fill:var(--ink2)">'+fdate(s[0].date)+'</text><text x="'+(W-pr)+'" y="'+(H-5)+'" text-anchor="end" style="font-size:11px;fill:var(--ink2)">'+fdate(s[s.length-1].date)+'</text></svg>';
+  return g;
+}
+function apBlock(P){
+  if(!P.n) return '';
+  var a=P.sum/P.n, msg=a<=1.1?'El approach funciona: casi siempre llegás al green con un golpe o menos.':a<=1.5?'El approach está bien, con algunos hoyos donde necesitás un golpe de más.':'Acá se te van golpes: seguido necesitás dos o más golpes para llegar al green desde menos de 90 m.';
+  var labels={'0':'Sin approach, llegaste al green de lejos','1':'1 golpe de approach','2':'2 golpes de approach','3+':'3 o más'};
+  return '<section class="block"><h3>Approach y putter</h3><p class="small muted" style="margin-bottom:10px">Golpes de approach = Cerca menos Putts. En los '+P.n+(P.n===1?' hoyo':' hoyos')+' donde anotaste los dos datos.</p>'+
+    '<div class="kpis two"><div class="kpi"><div class="v">'+f1(a)+'</div><div class="k">golpes de approach por hoyo</div></div><div class="kpi"><div class="v">'+f1(P.putts/P.n)+'</div><div class="k">putts por hoyo</div></div></div>'+
+    '<p style="margin-top:10px">'+msg+'</p>'+
+    '<div class="bars" style="margin-top:12px">'+['0','1','2','3+'].filter(function(k){return P.dist[k];}).map(function(k){ return '<div class="barrow"><span>'+labels[k]+'</span><span class="r">'+P.dist[k]+(P.dist[k]===1?' hoyo':' hoyos')+'</span><div class="track"><div class="fill" style="width:'+Math.round(100*P.dist[k]/P.n)+'%"></div></div></div>'; }).join('')+'</div></section>';
+}
+function puttsBlock(P){
+  if(!P.bothN) return '';
+  var tot=P.cortos+P.largos, k=18/P.bothN;
+  var h='<section class="block"><h3>Putts cortos y largos</h3><p class="small muted" style="margin-bottom:10px">Cortos son los putts desde menos de 1 m; largos, todos los demás. En los '+P.bothN+(P.bothN===1?' hoyo':' hoyos')+' donde anotaste los dos datos.</p>'+
+    '<div class="kpis"><div class="kpi"><div class="v">'+f1(tot/P.bothN)+'</div><div class="k">putts por hoyo</div></div><div class="kpi"><div class="v">'+f1(P.cortos*k)+'</div><div class="k">cortos por vuelta</div></div><div class="kpi"><div class="v">'+f1(P.largos*k)+'</div><div class="k">largos por vuelta</div></div></div>';
+  if(tot>0){ var pa=Math.round(100*P.cortos/tot), pb=100-pa;
+    h+='<div class="split">'+(P.cortos?'<div class="b" style="width:'+pa+'%">'+P.cortos+'</div>':'')+(P.largos?'<div class="a" style="width:'+pb+'%">'+P.largos+'</div>':'')+'</div><div class="legend"><span>Cortos, menos de 1 m ('+pct(P.cortos,tot)+')</span><span>Largos ('+pct(P.largos,tot)+')</span></div>'; }
+  return h+'</section>';
+}
+function vCompare(rounds){
+  var by={}; rounds.forEach(function(r){var k=tipoOf(r);(by[k]=by[k]||[]).push(r);});
+  var ks=TIPO_ORD.filter(function(k){return by[k];}); if(ks.length<2) return '';
+  var cols=ks.map(function(k){ var A=aggregate(by[k]), L=lossSplit(by[k]); var h=A.holes||1;
+    return {k:k,n:by[k].length,rel:A.holes?18*A.rel/A.holes:null,sal:A.sal.n?100*A.sal.ok/A.sal.n:null,gd:A.gd.n?A.gd.sum/A.gd.n:null,c:A.c.n?A.c.sum/A.c.n:null,dis:L.holes?18*L.dis/L.holes:null}; });
+  function cell(v,fmt){return v==null?'–':fmt(v);}
+  var rows=[['Vueltas',function(c){return c.n;}],['Contra el par, cada 18 hoyos',function(c){return cell(c.rel,relF);}],['Salidas en juego',function(c){return cell(c.sal,function(v){return Math.round(v)+'%';});}],['Distancia media al green',function(c){return cell(c.gd,function(v){return Math.round(v)+' m';});}],['Golpes de cerca por hoyo',function(c){return cell(c.c,f1);}],['Dobles o peor, cada 18 hoyos',function(c){return cell(c.dis,f1);}]];
+  var html='<section class="block" style="margin-top:12px"><h3>Torneo, amigos y práctica</h3><p class="small muted" style="margin-bottom:8px">Los mismos números separados por tipo de vuelta.</p><div style="overflow-x:auto"><table class="tbl"><thead><tr><th></th>'+cols.map(function(c){return '<th>'+TIPOS[c.k]+'</th>';}).join('')+'</tr></thead><tbody>'+rows.map(function(r){return '<tr><td style="white-space:normal">'+r[0]+'</td>'+cols.map(function(c){return '<td>'+r[1](c)+'</td>';}).join('')+'</tr>';}).join('')+'</tbody></table></div>';
+  var t=cols.filter(function(c){return c.k==='torneo';})[0], o=cols.filter(function(c){return c.k!=='torneo'&&c.rel!=null;});
+  if(t&&t.rel!=null&&o.length){ var ref=o[0], diff=t.rel-ref.rel;
+    html+='<p style="margin-top:10px">'+(Math.abs(diff)<0.5?'En torneo jugás parecido que '+(ref.k==='amigos'?'con amigos':'en práctica')+'.':'En torneo hacés <b>'+f1(Math.abs(diff))+' golpes '+(diff>0?'más':'menos')+'</b> cada 18 hoyos que '+(ref.k==='amigos'?'con amigos':'en práctica')+'.')+'</p>'; }
+  return html+'</section>';
+}
+function cabezaBlock(rs){
+  var an={}, rt={si:{n:0,rel:0},no:{n:0,rel:0}};
+  rs.forEach(function(r){ r.holes.forEach(function(h){ var d=r.scores[h.n]; if(!d||d.s==null) return; var v=d.s-h.par;
+    if(d.an){ var a=an[d.an]=an[d.an]||{n:0,rel:0}; a.n++; a.rel+=v; }
+    if(d.rut!=null){ var b=rt[d.rut?'si':'no']; b.n++; b.rel+=v; } }); });
+  var nAn=ANIMO_ORD.reduce(function(s,k){return s+(an[k]?an[k].n:0);},0), nRt=rt.si.n+rt.no.n;
+  if(!nAn&&!nRt) return '';
+  var html='<section class="block"><h3>Cabeza y rutina</h3><p class="small muted" style="margin-bottom:10px">Cómo jugás según cómo estás y si aplicás la rutina del golpe.</p>';
+  if(nRt){ html+='<div class="kpis'+(rt.si.n&&rt.no.n?'':' two')+'" style="margin-bottom:10px"><div class="kpi"><div class="v">'+pct(rt.si.n,nRt)+'</div><div class="k">hoyos con rutina</div></div>'+
+    (rt.si.n?'<div class="kpi"><div class="v">'+relF(rt.si.rel/rt.si.n)+'</div><div class="k">por hoyo con rutina</div></div>':'')+
+    (rt.no.n?'<div class="kpi"><div class="v">'+relF(rt.no.rel/rt.no.n)+'</div><div class="k">por hoyo sin rutina</div></div>':'')+'</div>'; }
+  if(nAn){ html+='<table class="tbl"><thead><tr><th>Cómo estabas</th><th>Hoyos</th><th>Media contra el par</th></tr></thead><tbody>'+
+    ANIMO_ORD.filter(function(k){return an[k];}).map(function(k){return '<tr><td>'+ANIMO[k]+'</td><td>'+an[k].n+' ('+pct(an[k].n,nAn)+')</td><td>'+relF(an[k].rel/an[k].n)+'</td></tr>';}).join('')+'</tbody></table>'; }
+  return html+'</section>';
+}
+function vStats(){
+  var all=sortedRounds().filter(function(r){return totals(r).n>0;});
+  var html='<header class="top"><h1>Estadísticas</h1></header>';
+  if(!all.length) return html+'<div class="empty"><h2>Sin datos todavía</h2><p>Cargá una vuelta y acá vas a ver en qué parte del juego se te van los golpes.</p></div>'+tabs();
+  var every=all, cnt={}; every.forEach(function(r){var k=tipoOf(r);cnt[k]=(cnt[k]||0)+1;});
+  if(UI.tipo!=='all'&&!cnt[UI.tipo]) UI.tipo='all';
+  html+='<div class="chips" style="margin-bottom:8px" role="group" aria-label="Tipo de vuelta">'+chip('Todos los tipos',UI.tipo==='all','data-a="tipoF" data-v="all"')+TIPO_ORD.filter(function(k){return cnt[k];}).map(function(k){return chip(TIPOS[k]+' ('+cnt[k]+')',UI.tipo===k,'data-a="tipoF" data-v="'+k+'"');}).join('')+'</div>';
+  if(UI.tipo!=='all') all=all.filter(function(r){return tipoOf(r)===UI.tipo;});
+  var rs=UI.range==='4'?all.slice(0,4):UI.range==='10'?all.slice(0,10):all, A=aggregate(rs);
+  html+='<div class="chips" style="margin-bottom:12px">'+chip('Todas ('+all.length+')',UI.range==='all','data-a="range" data-v="all"')+(all.length>4?chip('Últimas 4',UI.range==='4','data-a="range" data-v="4"'):'')+(all.length>10?chip('Últimas 10',UI.range==='10','data-a="range" data-v="10"'):'')+'</div>';
+  var full=A.series.filter(function(x){return x.full&&x.holes===18;}), best=full.length?Math.min.apply(null,full.map(function(x){return x.g;})):null, avg=full.length?full.reduce(function(s,x){return s+x.g;},0)/full.length:null;
+  html+='<div class="kpis" style="margin-bottom:12px"><div class="kpi"><div class="v">'+(avg==null?'–':f1(avg))+'</div><div class="k">promedio en 18 hoyos</div></div><div class="kpi"><div class="v">'+(best==null?'–':best)+'</div><div class="k">mejor vuelta</div></div><div class="kpi"><div class="v">'+relF(A.rel/A.holes)+'</div><div class="k">por hoyo contra el par</div></div></div>';
+  html+='<h2 style="margin:16px 0 8px">Tus tres números</h2>'+threeNums({salOk:A.sal.ok,salN:A.sal.n,gdSum:A.gd.sum,gdN:A.gd.n,cSum:A.c.sum,cN:A.c.n,c2:(A.c.dist['0']||0)+(A.c.dist['1']||0)+(A.c.dist['2']||0)});
+  if(UI.tipo==='all') html+=vCompare(every);
+  html+=vDiag(rs,A);
+  var tr=trendSvg(A.series); if(tr) html+='<section class="block" style="margin-top:12px"><h3>Evolución</h3><p class="small muted" style="margin-bottom:6px">Golpes sobre el par por vuelta, llevado a 18 hoyos.</p>'+tr+'</section>';
+  // salida
+  if(A.drv.n) html+='<section class="block" style="margin-top:12px"><h3>Golpes medidos con GPS</h3><div class="kpis"><div class="kpi"><div class="v">'+Math.round(A.drv.sum/A.drv.n)+'<small>m</small></div><div class="k">salida promedio</div></div><div class="kpi"><div class="v">'+A.drv.max+'<small>m</small></div><div class="k">salida más larga</div></div><div class="kpi"><div class="v">'+A.drv.n+'</div><div class="k">'+(A.drv.n===1?'salida medida':'salidas medidas')+'</div></div></div><p class="small muted" style="margin-top:8px">Hoyos par 4 y par 5 donde marcaste la salida y dónde quedó la bola.</p></section>';
+  if(A.sal.n||A.s3.n){ var miss=A.sal.n-A.sal.ok, m3=A.s3.n-A.s3.ok;
+    html+='<section class="block" style="margin-top:12px"><h3>Salida</h3>'+(A.sal.n?'<p style="margin-bottom:8px"><b>Par 4 y 5:</b> '+A.sal.ok+' de '+A.sal.n+' salidas en juego ('+pct(A.sal.ok,A.sal.n)+').'+(miss?' De las '+miss+' que no: '+A.sal.izq+' por izquierda, '+A.sal.der+' por derecha, '+A.sal.pen+' con penal.':'')+'</p>':'')+
+    (A.s3.n?'<p style="margin-bottom:8px"><b>Par 3:</b> '+A.s3.ok+' de '+A.s3.n+' salidas al centro.'+(m3?' De las '+m3+' que no: '+A.s3.izq+' por izquierda, '+A.s3.der+' por derecha, '+A.s3.pen+' con penal.':'')+'</p>':'')+
+    (A.sal.okN&&A.sal.noN?'<div class="kpis two"><div class="kpi"><div class="v">'+relF(A.sal.okRel/A.sal.okN)+'</div><div class="k">por hoyo con la salida en juego</div></div><div class="kpi"><div class="v">'+relF(A.sal.noRel/A.sal.noN)+'</div><div class="k">por hoyo cuando no quedó</div></div></div>':'')+'</section>'; }
+  // a green
+  if(A.gd.n){ var mxn=Math.max.apply(null,A.bands.map(function(b){return b.n;}));
+    html+='<section class="block"><h3>A green</h3><p class="small muted" style="margin-bottom:10px">Cuántos golpes al green pegaste desde cada distancia, y cuántos quedaron.</p><div class="bars">'+A.bands.map(function(b){ return '<div class="barrow"><span>'+b.label+' m</span><span class="r">'+b.n+(b.n===1?' golpe':' golpes')+(b.geN?', '+pct(b.geOk,b.geN)+' en green':'')+'</span><div class="track"><div class="fill" style="width:'+(mxn?Math.round(100*b.n/mxn):0)+'%"></div></div></div>'; }).join('')+'</div>'+
+    (A.bands.some(function(b){return b.relN;})?'<table class="tbl" style="margin-top:12px"><thead><tr><th>Distancia</th><th>Hoyos</th><th>Score contra el par</th></tr></thead><tbody>'+A.bands.filter(function(b){return b.relN;}).map(function(b){return '<tr><td>'+b.label+' m</td><td>'+b.relN+'</td><td>'+relF(b.rel/b.relN)+'</td></tr>';}).join('')+'</tbody></table>':'')+'</section>'; }
+  // cerca
+  if(A.c.n){ var largos=A.c.strokes-A.c.sum, tot=A.c.strokes;
+    html+='<section class="block"><h3>Cerca</h3><p style="margin-bottom:4px">'+f1(A.c.sum/A.c.n)+' golpes de cerca por hoyo, unos '+Math.round(18*A.c.sum/A.c.n)+' por vuelta.</p>'+
+    (tot>0?'<div class="split"><div class="a" style="width:'+Math.round(100*largos/tot)+'%">'+pct(largos,tot)+'</div><div class="b" style="width:'+Math.round(100*A.c.sum/tot)+'%">'+pct(A.c.sum,tot)+'</div></div><div class="legend"><span>Largos, de más de 90 m</span><span>Cerca, con putts</span></div>':'')+
+    '<div class="bars" style="margin-top:12px">'+['0','1','2','3','4','5+'].filter(function(k){return A.c.dist[k];}).map(function(k){ return '<div class="barrow"><span>'+k+(k==='1'?' golpe de cerca':' golpes de cerca')+'</span><span class="r">'+A.c.dist[k]+(A.c.dist[k]===1?' hoyo':' hoyos')+'</span><div class="track"><div class="fill" style="width:'+Math.round(100*A.c.dist[k]/A.c.n)+'%"></div></div></div>'; }).join('')+'</div>'+
+    (A.putts.n?'<p class="small muted" style="margin-top:10px">Putts: '+f1(A.putts.sum/A.putts.n)+' por hoyo en los '+A.putts.n+' hoyos donde los anotaste.</p>':'')+'</section>'; }
+  html+=apBlock(A.ap);
+  html+=puttsBlock(A.putts);
+  html+=cabezaBlock(rs);
+  // resultados
+  html+='<section class="block"><h3>Resultados por hoyo</h3><div class="kpis four" style="margin-bottom:10px">'+[['Birdies o mejor',A.types.b],['Pares',A.types.p],['Bogeys',A.types.bo],['Dobles o más',A.types.d+A.types.t]].map(function(x){return '<div class="kpi"><div class="v">'+x[1]+'</div><div class="k">'+x[0]+'</div></div>';}).join('')+'</div>'+
+    '<table class="tbl"><thead><tr><th>Tipo de hoyo</th><th>Jugados</th><th>Media contra el par</th></tr></thead><tbody>'+[3,4,5].filter(function(p){return A.byPar[p].n;}).map(function(p){return '<tr><td>Par '+p+'</td><td>'+A.byPar[p].n+'</td><td>'+relF(A.byPar[p].rel/A.byPar[p].n)+'</td></tr>';}).join('')+'</tbody></table></section>';
+  // hoyo por hoyo
+  var hk=Object.keys(A.byHole).map(Number).sort(function(a,b){return a-b;});
+  if(hk.length){ var c=courseById(A.mainCourse), worst=hk.slice().sort(function(a,b){return A.byHole[b].net/A.byHole[b].n-A.byHole[a].net/A.byHole[a].n;}).slice(0,3);
+    html+='<section class="block"><h3>Hoyo por hoyo'+(c?' en '+esc(c.name):'')+'</h3>'+(hk.length>3?'<p style="margin-bottom:8px">Los que más te cuestan contra tu par: hoyos '+worst.join(', ').replace(/, (\d+)$/,' y $1')+'.</p>':'')+
+    '<table class="tbl"><thead><tr><th>Hoyo</th><th>Par</th><th>Veces</th><th>Promedio</th><th>Contra tu par</th></tr></thead><tbody>'+hk.map(function(n){var b=A.byHole[n];return '<tr><td>'+n+'</td><td>'+b.par+'</td><td>'+b.n+'</td><td>'+f1(b.s/b.n)+'</td><td>'+relF(b.net/b.n)+'</td></tr>';}).join('')+'</tbody></table></section>'; }
+  return html+tabs();
+}
+
+/* ---------- Handicap y metas ---------- */
+function hcpLog(){ var l=(S.profile.hcpLog||[]).slice().sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:0;}); return l; }
+function goals(){ return (S.profile.goals||[]).slice().sort(function(a,b){return a.date<b.date?-1:1;}); }
+function dnum(s){ var p=s.split('-'); return Date.UTC(+p[0],+p[1]-1,+p[2])/86400000; }
+function hf(v){return v==null?'–':(+v).toLocaleString('es-AR',{maximumFractionDigits:1});}
+function curHcp(){ var l=hcpLog(); return l.length?l[l.length-1].v:(S.profile.hcp==null?null:S.profile.hcp); }
+function planAt(day){
+  var l=hcpLog(), g=goals(); if(!l.length||!g.length) return null;
+  var pts=[{d:dnum(l[0].date),v:l[0].v}].concat(g.map(function(x){return {d:dnum(x.date),v:x.v};}));
+  if(day<=pts[0].d) return pts[0].v;
+  for(var i=1;i<pts.length;i++){ if(day<=pts[i].d){ var a=pts[i-1],b=pts[i]; return a.v+(b.v-a.v)*(day-a.d)/Math.max(1,b.d-a.d); } }
+  return pts[pts.length-1].v;
+}
+function playSignal(){
+  var rs=sortedRounds().filter(function(r){return r.status!=='en_curso'&&tipoOf(r)!=='practica'&&totals(r).n>=9;}).slice(0,5);
+  if(!rs.length) return null;
+  var rel=0,n=0; rs.forEach(function(r){var t=totals(r); rel+=t.rel; n+=t.n;});
+  return {n:rs.length,rel18:18*rel/n};
+}
+function hcpChart(){
+  var l=hcpLog(), g=goals(); if(!l.length) return '';
+  var d0=dnum(l[0].date), d1=Math.max(dnum(today()),dnum(l[l.length-1].date)); g.forEach(function(x){d1=Math.max(d1,dnum(x.date));}); if(d1-d0<14) d1=d0+14;
+  var vals=l.map(function(x){return x.v;}).concat(g.map(function(x){return x.v;})), mx=Math.max.apply(null,vals)+1, mn=Math.min.apply(null,vals)-1;
+  var W=340,H=190,pl=28,pr=12,pt=14,pb=24;
+  function X(d){return pl+(W-pl-pr)*(d-d0)/(d1-d0);} function Y(v){return pt+(H-pt-pb)*(mx-v)/(mx-mn);}
+  var svg='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Evolución del handicap contra el plan" style="width:100%;height:auto;display:block">';
+  var step=(mx-mn)>16?5:2; for(var v=Math.ceil(mn/step)*step;v<=mx;v+=step){ svg+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" style="stroke:var(--line);stroke-width:1"/><text x="'+(pl-6)+'" y="'+(Y(v)+4)+'" text-anchor="end" style="font-size:11px;fill:var(--ink2)">'+v+'</text>'; }
+  if(g.length){ var pp=[{d:d0,v:l[0].v}].concat(g.map(function(x){return {d:dnum(x.date),v:x.v};}));
+    svg+='<path d="'+pp.map(function(p,i){return (i?'L':'M')+X(p.d).toFixed(1)+' '+Y(p.v).toFixed(1);}).join(' ')+'" style="fill:none;stroke:var(--ink2);stroke-width:1.5;stroke-dasharray:5 4"/>';
+    g.forEach(function(x){ var cx=X(dnum(x.date)), cy=Y(x.v); svg+='<path d="M'+cx+' '+(cy-14)+'v14" style="stroke:var(--ink);stroke-width:1.5"/><path d="M'+cx+' '+(cy-14)+'l9 3.5l-9 3.5z" style="fill:var(--flag)"/><text x="'+(cx-4)+'" y="'+(cy+15)+'" text-anchor="end" style="font-size:12px;font-weight:600;fill:var(--ink)">'+hf(x.v)+'</text>'; }); }
+  var tx=X(dnum(today())); svg+='<line x1="'+tx+'" x2="'+tx+'" y1="'+pt+'" y2="'+(H-pb)+'" style="stroke:var(--line);stroke-width:1"/><text x="'+tx+'" y="'+(H-8)+'" text-anchor="middle" style="font-size:11px;fill:var(--ink2)">hoy</text>';
+  if(l.length>1) svg+='<path d="'+l.map(function(p,i){return (i?'L':'M')+X(dnum(p.date)).toFixed(1)+' '+Y(p.v).toFixed(1);}).join(' ')+'" style="fill:none;stroke:var(--green);stroke-width:2.5;stroke-linejoin:round"/>';
+  l.forEach(function(p){ svg+='<circle cx="'+X(dnum(p.date))+'" cy="'+Y(p.v)+'" r="4" style="fill:var(--surface);stroke:var(--green);stroke-width:2.2"/>'; });
+  if(tx-pl>70) svg+='<text x="'+pl+'" y="'+(H-8)+'" style="font-size:11px;fill:var(--ink2)">'+fdate(l[0].date)+'</text>';
+  if(g.length){ var lg=g[g.length-1], gx=X(dnum(lg.date)); if(gx-tx>70) svg+='<text x="'+(W-pr)+'" y="'+(H-8)+'" text-anchor="end" style="font-size:11px;fill:var(--ink2)">'+fdate(lg.date)+'</text>'; }
+  svg+='</svg>';
+  return svg+'<div class="legend" style="justify-content:flex-start;gap:16px;margin-top:4px"><span><b style="color:var(--green)">●</b> tu handicap</span><span>- - - plan hacia las metas</span></div>';
+}
+function vHcp(){
+  var l=hcpLog(), g=goals(), cur=curHcp(), td=dnum(today());
+  var html='<header class="top"><h1>Handicap</h1><span class="sync">'+syncText()+'</span></header>';
+  var next=g.filter(function(x){return dnum(x.date)>=td;})[0];
+  html+='<div class="kpis" style="margin-bottom:12px"><div class="kpi"><div class="v">'+hf(cur)+'</div><div class="k">handicap actual</div></div>'+
+    '<div class="kpi"><div class="v">'+(next?hf(next.v):'–')+'</div><div class="k">'+(next?'meta al '+fdate(next.date):'sin meta próxima')+'</div></div>'+
+    '<div class="kpi"><div class="v">'+(next&&cur!=null?hf(Math.max(0,cur-next.v)):'–')+'</div><div class="k">golpes que faltan</div></div></div>';
+  if(next&&cur!=null){ var days=dnum(next.date)-td, months=Math.max(days/30.4,0.1), need=(cur-next.v)/months, plan=planAt(td);
+    var msg;
+    if(cur<=next.v) msg='<b>Meta cumplida.</b> Ya estás en '+hf(cur)+', en o por debajo de '+hf(next.v)+'.';
+    else { var diff=cur-plan; msg=(Math.abs(diff)<0.5?'<b>Vas en el plan.</b> ':diff>0?'<b>Vas '+f1(diff)+' golpes atrasado</b> respecto del plan. ':'<b>Vas '+f1(-diff)+' golpes adelantado</b> respecto del plan. ')+'Te faltan '+days+' días: tenés que bajar unos <b>'+f1(need)+' golpes por mes</b>.'; }
+    if(l.length>1){ var a=l[0],b=l[l.length-1], span=dnum(b.date)-dnum(a.date); if(span>=14){ var rate=(a.v-b.v)/(span/30.4); msg+=' Tu ritmo real hasta ahora: '+f1(rate)+' golpes por mes.'; } }
+    html+='<div class="note">'+msg+'</div>'; }
+  html+='<section class="block"><h3>Evolución</h3>'+(l.length?hcpChart():'<p class="muted">Cargá tu handicap actual para empezar el gráfico.</p>')+'</section>';
+  var sig=playSignal();
+  if(sig&&cur!=null){ var gap=sig.rel18-cur;
+    html+='<section class="block"><h3>Cómo estás jugando</h3><p>'+(sig.n===1?'En tu última vuelta':'En tus últimas '+sig.n+' vueltas')+' (sin contar práctica) promediás <b>'+relF(sig.rel18)+'</b> contra el par cada 18 hoyos. '+
+      (Math.abs(gap)<1?'Es lo mismo que tu handicap.':gap<0?'Es <b>'+f1(-gap)+' golpes mejor</b> que tu handicap: si lo sostenés en torneo, el handicap va a bajar.':'Es <b>'+f1(gap)+' golpes peor</b> que tu handicap.')+'</p>'+
+      '<p class="small muted" style="margin-top:6px">Es una señal aproximada: el handicap oficial usa el rating y el slope de la cancha y tus mejores diferenciales.</p></section>'; }
+  html+='<section class="block"><h3>Cargar handicap</h3><p class="small muted" style="margin-bottom:10px">Cada vez que te cambie el handicap, cargalo con la fecha.</p><div class="row" style="justify-content:flex-start;flex-wrap:wrap"><input type="date" id="hlDate" value="'+today()+'" style="width:auto;flex:1 1 150px" aria-label="Fecha"><input type="number" id="hlVal" inputmode="decimal" step="0.1" min="0" max="54" placeholder="Hcp" class="narrow" aria-label="Handicap"><button class="btn primary" data-a="hlAdd">Guardar</button></div>';
+  if(l.length) html+='<ul class="list" style="margin-top:10px">'+l.slice().reverse().map(function(x){return '<li class="mini"><span>'+fdate(x.date,true)+'</span><span><b class="num" style="font-size:22px">'+hf(x.v)+'</b> <button class="link" data-a="hlDel" data-date="'+x.date+'" aria-label="Borrar registro">Borrar</button></span></li>';}).join('')+'</ul>';
+  html+='</section>';
+  html+='<section class="block"><h3>Metas</h3><div class="stack">'+g.map(function(x,i){ return '<div class="row" style="justify-content:flex-start;flex-wrap:wrap"><input type="date" data-c="goal" data-i="'+i+'" data-k="date" value="'+esc(x.date)+'" style="width:auto;flex:1 1 150px" aria-label="Fecha de la meta"><input type="number" class="narrow" inputmode="decimal" step="0.1" min="0" max="54" data-c="goal" data-i="'+i+'" data-k="v" value="'+x.v+'" aria-label="Handicap meta"><button class="link" data-a="goalDel" data-i="'+i+'">Quitar</button></div>'; }).join('')+'</div><button class="btn quiet" style="margin-top:10px" data-a="goalAdd">Agregar meta</button></section>';
+  return html+tabs();
+}
+function saveProfile(){ S.profile.updatedAt=Date.now(); markDirty('profile'); }
+
+/* ---------- Reflexión después de jugar ---------- */
+var SENS=['Suelto','Concentrado','Disfrutando','Tenso','Apurado','Frustrado','Cansado','Distraído'];
+var CAUSES=['Viento','Calor','Frío o lluvia','Greens rápidos o lentos','Cansancio físico','Apuro o poco tiempo','Ritmo de juego o compañeros','La cabeza en otra cosa','Ninguna'];
+var ERR={decision:'Elegí mal el golpe',apunte:'Apunté mal',ejecucion:'Ejecuté mal',cabeza:'Me ganó la cabeza'};
+var LVL5=['Muy baja','Baja','Normal','Alta','Muy alta'];
+function refl(r){ return r.refl||{}; }
+function reflDone(r){ var f=r.refl; return !!(f&&f.conf&&f.ans); }
+function badHoles(r){ return r.holes.filter(function(h){var d=r.scores[h.n];return d&&d.s!=null&&d.s-h.par>=2;}); }
+function scale(key,val,label){ return '<div class="chips" role="group" aria-label="'+label+'" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px">'+[1,2,3,4,5].map(function(i){return '<button class="chip" style="padding:8px 2px;font-size:13px;white-space:normal;line-height:1.15" aria-pressed="'+(val===i?'true':'false')+'" data-a="rf" data-k="'+key+'" data-v="'+i+'"><b style="font-size:18px">'+i+'</b><br>'+LVL5[i-1]+'</button>';}).join('')+'</div>'; }
+function vReflect(){
+  var r=S.rounds[UI.roundId]; if(!r){ UI.view='history'; return vHistory(); }
+  var f=refl(r), t=totals(r), bad=badHoles(r);
+  var html='<header class="bar"><button class="link" data-a="card">Tarjeta</button><h1>Reflexión</h1><span></span></header>';
+  html+='<p class="muted" style="margin-bottom:12px">'+esc(r.courseName)+', '+fdate(r.date,true)+'. '+(t.n?t.g+' golpes en '+t.n+' hoyos ('+rel(t.rel)+').':'')+' Respondé en caliente, toma dos minutos: lo que sentiste también explica la tarjeta.</p>';
+  var hcpR=r.hcp||curHcp(); if(hcpR&&t.n===r.holes.length){ var parT=r.holes.reduce(function(a,h){return a+h.par;},0), exp=Math.round(parT+(+hcpR+3)*r.holes.length/18);
+    html+='<div class="note">Con handicap '+hf(hcpR)+', una vuelta normal en '+r.holes.length+' hoyos es unos <b>'+exp+' golpes</b>: tu handicap más 3, como explican Mikel y Lucía (el handicap sale de tus 8 mejores tarjetas de 20, no de tu promedio). Hiciste <b>'+t.g+'</b>: '+(t.g<=exp-2?'mejor que una vuelta normal.':t.g<=exp+2?'una vuelta normal para tu nivel.':'por encima de lo normal, buscá abajo qué pasó.')+'</div>'; }
+  html+='<section class="block"><h3>¿Cómo te sentiste jugando?</h3><p class="small muted" style="margin-bottom:8px">Marcá todas las que apliquen.</p><div class="chips">'+SENS.map(function(x){return chip(x,(f.sens||[]).indexOf(x)>=0,'data-a="rfm" data-k="sens" data-v="'+esc(x)+'"');}).join('')+'</div></section>';
+  html+='<section class="block"><h3>¿Cuánta confianza tuviste en tus golpes?</h3>'+scale('conf',f.conf,'Confianza')+'</section>';
+  html+='<section class="block"><h3>¿Cuántos nervios o ansiedad sentiste?</h3>'+scale('ans',f.ans,'Ansiedad')+'</section>';
+  html+='<section class="block"><h3>¿Algo de afuera te influyó?</h3><div class="chips">'+CAUSES.map(function(x){return chip(x,(f.causes||[]).indexOf(x)>=0,'data-a="rfm" data-k="causes" data-v="'+esc(x)+'"');}).join('')+'</div></section>';
+  if(bad.length){ html+='<section class="block"><h3>Los hoyos que se complicaron</h3><p class="small muted" style="margin-bottom:10px">Como dice Mikel: antes de cambiar el swing, separá si elegiste mal, apuntaste mal o ejecutaste mal.</p>'+
+    bad.map(function(h){ var d=r.scores[h.n], hr=(f.holes||{})[h.n]||{};
+      return '<div style="padding:10px 0;border-top:1px solid var(--line)"><p style="margin-bottom:6px"><b>Hoyo '+h.n+'</b>, par '+h.par+': '+mk(d.s,h.par)+' '+scoreName(d.s-h.par)+'</p><div class="chips">'+Object.keys(ERR).map(function(k){return chip(ERR[k],hr.err===k,'data-a="rfh" data-n="'+h.n+'" data-v="'+k+'"');}).join('')+'</div>'+
+        '<p class="small muted" style="margin:8px 0 4px">¿Cómo llegaste al tee?</p><div class="chips">'+['Tranquilo','Tenso','Enfadado'].map(function(x){return chip(x,hr.tee===x,'data-a="rfh2" data-k="tee" data-n="'+h.n+'" data-v="'+x+'"');}).join('')+'</div>'+
+        '<p class="small muted" style="margin:8px 0 4px">¿Hiciste tu rutina en todos los golpes?</p><div class="chips">'+chip('Sí',hr.rut==='si','data-a="rfh2" data-k="rut" data-n="'+h.n+'" data-v="si"')+chip('No',hr.rut==='no','data-a="rfh2" data-k="rut" data-n="'+h.n+'" data-v="no"','bad')+'</div>'+
+        '<input type="text" data-c="rfhNote" data-n="'+h.n+'" value="'+esc(hr.note||'')+'" placeholder="¿Por qué pasó realmente? En pocas palabras" style="margin-top:8px" aria-label="Nota del hoyo '+h.n+'"></div>'; }).join('')+
+    '<div style="padding:10px 0 0;border-top:1px solid var(--line)"><p style="margin-bottom:6px"><b>Después de un mal hoyo</b>, ¿qué buscaste?</p><div class="chips">'+chip('El golpe aburrido y seguro',f.after==='seguro','data-a="rf2" data-k="after" data-v="seguro"')+chip('Recuperar todo de una',f.after==='heroico','data-a="rf2" data-k="after" data-v="heroico"','bad')+'</div></div></section>'; }
+  html+='<section class="block"><h3>¿Qué golpe o hoyo te dejó la mejor sensación?</h3><input type="text" data-c="rft" data-k="best" value="'+esc(f.best||'')+'" placeholder="Ej.: el chip del 7, rodé como quería" aria-label="Mejor sensación"></section>';
+  html+='<section class="block"><h3>Si jugaras mañana, ¿qué harías distinto?</h3><input type="text" data-c="rft" data-k="next" value="'+esc(f.next||'')+'" placeholder="Ej.: híbrido en las salidas angostas" aria-label="Qué harías distinto"></section>';
+  html+=reflFeedback(r);
+  html+='<div class="stack" style="margin-top:12px"><button class="btn primary big" data-a="card">Listo</button></div>';
+  return html;
+}
+function reflTips(r){
+  var f=refl(r), tips=[], errs={}; Object.keys(f.holes||{}).forEach(function(n){var e=f.holes[n].err; if(e) errs[e]=(errs[e]||0)+1;});
+  if(errs.decision) tips.push({id:'decidir',txt:'En '+errs.decision+(errs.decision===1?' hoyo':' hoyos')+' el problema fue la decisión: practicá "rodar, volar o parar" y jugá al centro del green.'});
+  if(errs.apunte) tips.push({id:'mapa',txt:'Apuntaste mal en '+errs.apunte+(errs.apunte===1?' hoyo':' hoyos')+': elegí siempre un punto de bote concreto y sacale la "foto" antes de pegar.'});
+  if(errs.ejecucion) tips.push({id:'vuelo',txt:'La ejecución falló en '+errs.ejecucion+(errs.ejecucion===1?' hoyo':' hoyos')+': ahí sí sirve el trabajo técnico, con el control de distancia y el mapa de palos.'});
+  var hs=f.holes||{}, angry=0, noRut=0; Object.keys(hs).forEach(function(n){ if(hs[n].tee==='Enfadado'||hs[n].tee==='Tenso') angry++; if(hs[n].rut==='no') noRut++; });
+  if(errs.cabeza||(f.ans>=4)) tips.push({id:'nervios',txt:'Los nervios pesaron. No te digas "calmate": ocupá la cabeza con tres preguntas antes de pegar: ¿dónde quiero que caiga?, ¿a qué apunto exactamente?, ¿cómo estoy respirando? Soltá el aire despacio y llegá a la bola con una sola palabra, como "suave".'});
+  if(angry) tips.push({id:'tee',txt:'En '+angry+(angry===1?' hoyo complicado llegaste':' hoyos complicados llegaste')+' al tee tenso o enfadado. Los peores hoyos suelen empezar ahí: cerrá cada hoyo en el green con un gesto y una respiración, y arrancá el siguiente de cero.'});
+  if(noRut) tips.push({id:'rutina',txt:'En '+noRut+(noRut===1?' hoyo':' hoyos')+' no hiciste tu rutina. Practicala en la cancha: las últimas 5 bolas del calentamiento, con el palo del hoyo 1, como si te estuvieran mirando.'});
+  if(f.after==='heroico') tips.push({id:'tren',txt:'Después de un mal hoyo fuiste a recuperarlo todo de una: así empieza el "tren de bogeys". La mejor salida suele ser el golpe aburrido, aceptando el bogey.'});
+  if(f.conf&&f.conf<=2) tips.push({id:'conf',txt:'Con poca confianza, elegí el golpe que sabés jugar aunque no sea el más lindo: un chip rodado antes que un flop, un híbrido antes que el driver.'});
+  if((f.sens||[]).indexOf('Apurado')>=0||(f.causes||[]).indexOf('Apuro o poco tiempo')>=0) tips.push({id:'apuro',txt:'Jugaste apurado: llegá con tiempo para calentar y hacé la rutina aunque el grupo de atrás espere.'});
+  return tips;
+}
+var LESSONS={
+  malhoyo:{who:'Jon Rahm',txt:'Abrió el Masters 2023 con un doble bogey en el hoyo 1, después de cuatro putts, y terminó esa vuelta en 65. Un mal hoyo no define la vuelta: aceptalo y pensá solo en el golpe que sigue.'},
+  heroico:{who:'Sergio García',txt:'En el hoyo 13 del Masters 2017 mandó la bola a las plantas, tomó la penalidad y buscó un buen bogey en lugar del golpe milagroso. Ese domingo ganó su primer grande.'},
+  nervios:{who:'Rory McIlroy',txt:'Antes del desempate del Masters, después de fallar un putt corto en el 18, le recordaron que el lunes hubiera firmado estar en esa situación. Mirá la presión como un desafío que elegiste, no como un examen.'},
+  confianza:{who:'Rory McIlroy',txt:'Se derrumbó con 80 golpes el domingo del Masters 2011 y dos meses después ganó el US Open por ocho. Una mala racha no borra lo que sabés hacer.'},
+  enojo:{who:'Tiger Woods',txt:'En el US Open 2000 hizo triple bogey en el hoyo 3 de una vuelta y aun así ganó el torneo por 15 golpes: no arrastró el enojo al golpe siguiente.'},
+  corto:{who:'Seve Ballesteros',txt:'Aprendió de chico en la playa con un solo hierro 3, inventando golpes. Alrededor del green, rodar la bola con un hierro corto suele rendir más que el golpe lindo.'}
+};
+function pickLesson(r){
+  var f=refl(r), hs=f.holes||{}, angry=Object.keys(hs).some(function(n){return hs[n].tee==='Enfadado';})||(f.sens||[]).indexOf('Frustrado')>=0;
+  if(f.after==='heroico') return LESSONS.heroico;
+  if(f.ans>=4) return LESSONS.nervios;
+  if(angry) return LESSONS.enojo;
+  if(f.conf&&f.conf<=2) return LESSONS.confianza;
+  if(badHoles(r).length) return LESSONS.malhoyo;
+  return LESSONS.corto;
+}
+function reflFeedback(r){
+  var f=refl(r); if(!reflDone(r)) return '';
+  var tips=reflTips(r), html='<section class="block" style="border-color:var(--green)"><h3>Devolución</h3>';
+  html+=tips.length?'<ul style="margin:0;padding-left:18px">'+tips.map(function(x){return '<li style="margin-bottom:6px">'+x.txt+'</li>';}).join('')+'</ul>':'<p>Buena cabeza en esta vuelta. Seguí con el plan de la semana en Entrenar.</p>';
+  var ls=pickLesson(r); html+='<div style="margin-top:12px;padding:12px 14px;border-left:4px solid var(--flag);background:var(--surface2);border-radius:8px"><p class="small muted" style="margin-bottom:4px">Lección de los grandes · '+ls.who+'</p><p>'+ls.txt+'</p></div>';
+  if(f.fb) html+='<div class="note" style="margin:10px 0 0;white-space:pre-line">'+esc(f.fb)+'</div>';
+  if(sampleFn) html+='<button class="btn quiet" style="margin-top:10px;width:100%" data-a="rfAsk">'+(UI.rfBusy?'Pensando…':(f.fb?'Pedir otra devolución a Claude':'Pedir una devolución a Claude'))+'</button>';
+  return html+'</section>';
+}
+function askReflect(){
+  var r=curRound(); if(!r||!sampleFn||UI.rfBusy) return; var f=refl(r), t=totals(r);
+  var holes=r.holes.map(function(h){var d=r.scores[h.n]||{}, hr=(f.holes||{})[h.n]||{}; return 'H'+h.n+' par '+h.par+': '+(d.s==null?'-':d.s)+' golpes'+(d.sal!=null?', salida '+(d.sal?'en juego':'fuera '+(d.lado||'')):'')+(d.gd!=null?', a green desde '+d.gd+' m':'')+(d.c!=null?', cerca '+d.c:'')+(d.p!=null?', putts '+d.p:'')+(hr.err?', error: '+ERR[hr.err]:'')+(hr.tee?', llegó al tee '+hr.tee.toLowerCase():'')+(hr.rut?', rutina: '+hr.rut:'')+(hr.note?' ('+hr.note+')':'');}).join('\n');
+  var prompt='Sos un entrenador de golf amable y directo, que sigue el enfoque de Mikel Bustamante (Easy Golf): medir salida en juego, distancia al green y golpes desde menos de 90 m; rodar si podés, volar si tenés que hacerlo, parar solo si no queda otra; apuntar al centro del green; separar si el error fue de decisión, de apunte o de ejecución antes de tocar el swing; rutina mental de 3 pasos; para los nervios, las tres preguntas (dónde quiero que caiga, a qué apunto, cómo respiro); una vuelta normal es handicap más 3; cerrar cada hoyo en el green y evitar el tren de bogeys con el golpe aburrido. '+
+   'El jugador tiene handicap '+hf(curHcp())+' y quiere llegar a 25. Vuelta '+TIPOS[tipoOf(r)].toLowerCase()+' en '+r.courseName+': '+t.g+' golpes en '+t.n+' hoyos ('+rel(t.rel)+').\n'+holes+
+   '\nSensaciones: '+((f.sens||[]).join(', ')||'-')+'. Confianza '+f.conf+'/5. Ansiedad '+f.ans+'/5. Causas externas: '+((f.causes||[]).join(', ')||'-')+'. Mejor sensación: '+(f.best||'-')+'. Qué haría distinto: '+(f.next||'-')+'. Después de un mal hoyo buscó: '+(f.after==='heroico'?'recuperar todo de una':f.after==='seguro'?'el golpe seguro':'-')+'.\n'+
+   'Respondé solo con JSON: {"devolucion": "3 a 5 oraciones en español rioplatense, tuteando con voseo: qué te dice la vuelta combinando números y sensaciones, una cosa concreta para la próxima vuelta y una pregunta para que el jugador piense"}. Sin markdown.';
+  UI.rfBusy=true; render();
+  sampleFn.json(prompt,{modelTier:'quick'}).then(function(j){ UI.rfBusy=false; var txt=j&&typeof j.devolucion==='string'?j.devolucion.trim().slice(0,1200):''; if(txt){ r.refl=Object.assign({},f,{fb:txt}); touch(r); } else toast('No pude generar la devolución'); render(); })
+   .catch(function(e){ UI.rfBusy=false; toast((e&&e.code==='not_granted')?'Sin permiso para consultar a Claude':'No pude generar la devolución ahora'); render(); });
+}
+function headBlock(){
+  var rs=sortedRounds().filter(function(r){return r.status!=='en_curso'&&reflDone(r);}); if(!rs.length) return '';
+  var conf=0,ans=0,cs={},es={}; rs.forEach(function(r){var f=r.refl; conf+=f.conf; ans+=f.ans; (f.causes||[]).forEach(function(c){if(c!=='Ninguna')cs[c]=(cs[c]||0)+1;}); Object.keys(f.holes||{}).forEach(function(n){var e=f.holes[n].err; if(e) es[e]=(es[e]||0)+1;});});
+  var html='<section class="block"><h2 style="margin-bottom:6px">Cabeza y sensaciones</h2><div class="kpis two" style="margin-bottom:10px"><div class="kpi"><div class="v">'+f1(conf/rs.length)+'<small>/5</small></div><div class="k">confianza promedio</div></div><div class="kpi"><div class="v">'+f1(ans/rs.length)+'<small>/5</small></div><div class="k">ansiedad promedio</div></div></div>';
+  var hi=rs.filter(function(r){return r.refl.conf>=4;}), lo=rs.filter(function(r){return r.refl.conf<=2;});
+  function avg(a){var g=0,n=0;a.forEach(function(r){var t=totals(r);g+=t.rel;n+=t.n;});return n?18*g/n:null;}
+  if(hi.length&&lo.length){ var d=avg(lo)-avg(hi); html+='<p style="margin-bottom:8px">Con confianza alta jugás <b>'+f1(Math.abs(d))+' golpes '+(d>=0?'mejor':'peor')+'</b> cada 18 hoyos que con confianza baja.</p>'; }
+  var ek=Object.keys(es).sort(function(a,b){return es[b]-es[a];});
+  if(ek.length) html+='<p style="margin-bottom:8px">En los hoyos complicados, lo que más se repite: <b>'+ERR[ek[0]].toLowerCase()+'</b> ('+es[ek[0]]+(es[ek[0]]===1?' vez':' veces')+').'+(ek[0]==='ejecucion'?' Ahí sí vale el trabajo técnico.':' Eso no se arregla cambiando el swing: es decisión y cabeza.')+'</p>';
+  var ck=Object.keys(cs).sort(function(a,b){return cs[b]-cs[a];});
+  if(ck.length) html+='<p class="small muted">Causas externas más frecuentes: '+ck.slice(0,3).map(function(k){return k.toLowerCase()+' ('+cs[k]+')';}).join(', ')+'.</p>';
+  return html+'</section>';
+}
+
+/* ---------- Entrenar (basado en los videos de Mikel Bustamante) ---------- */
+var DRILLS={
+  test100:{t:'Prueba de los 100 m',area:'Diagnóstico',min:45,cerca:true,
+    how:['10 puestos de juego corto y putt alrededor del green, 3 bolas en cada uno: 30 bolas.','Contá los golpes hasta embocar cada bola. No borres las malas: medís tu juego, no tu mejor golpe.','Mirá en qué puestos se te van más golpes (chip, pitch o putt).'],
+    m:'Golpes totales de las 30 bolas',better:'down'},
+  mapa:{t:'Mapa de palos',area:'Chip, rodar',min:20,cerca:true,
+    how:['Poné una moneda un paso adentro del green: es tu punto de bote.','Desde el mismo lugar y con el mismo tamaño de swing, botá en la moneda con hierro 8, pitching y sándwich.','Mirá cuánto rueda cada palo. Ese es tu mapa: si botás bien pero rueda de más o de menos, cambiá de palo.'],
+    m:'Bolas que botaron en la moneda, de 15',better:'up'},
+  vuelo:{t:'Control de distancia: 30, 40 y 50 m',area:'Pitch, volar',min:20,cerca:true,
+    how:['3 bolas a 30 m, 3 a 40 m y 3 a 50 m: 9 bolas.','La distancia la da el tamaño del swing, nunca pegarle más fuerte.','Sumá 5 minutos del golpe de transición: el chip con la base del palo apoyada entera, para cuando el chip queda corto y el pitch se pasa.'],
+    m:'Bolas a menos de 3 pasos del hoyo, de 9',better:'up'},
+  decidir:{t:'Rodar, volar o parar',area:'Decisión alrededor del green',min:20,cerca:true,
+    how:['9 bolas desde 9 lugares distintos alrededor del green.','Antes de cada una decí en voz alta "rodar", "volar" o "parar": rodá si podés, volá si tenés que hacerlo, pará solo si no queda otra.','Hacé la rutina completa y contá los golpes hasta embocar. Repetila la semana siguiente.'],
+    m:'Golpes para embocar las 9 bolas',better:'down'},
+  putt:{t:'Putts de 1 a 2 metros',area:'Putt corto',min:20,cerca:true,
+    how:['Reemplaza la sesión de chip cuando el putt es tu mayor fuga.','10 putts desde 1 m y 10 desde 2 m, alrededor del hoyo.','Referencia de los videos: un scratch mete el 93% desde menos de 2 m y un handicap 25, el 82%.'],
+    m:'Embocados, de 20',better:'up'},
+  salida:{t:'Salida segura',area:'Salida',min:30,cerca:false,
+    how:['Con más de 30 de handicap la prioridad es dejar la bola en juego, no la distancia.','En la cancha de práctica elegí una calle imaginaria y pegá 10 salidas con el palo que te deja la bola en juego, aunque sea un híbrido.','En la vuelta, usá ese palo en los hoyos donde el driver te mete en problemas.'],
+    m:'Salidas en la calle, de 10',better:'up',adapt:true},
+  dist7:{t:'Tu distancia real: 7 bolas por palo',area:'Golpe a green',min:30,cerca:false,
+    how:['Sobre hierba si podés (la alfombra de la cancha perdona los golpes), pegá 7 bolas con un palo.','Ordenalas por distancia y quedate con la del medio: esa es tu distancia normal, no la de tu mejor día.','Repetilo con 2 o 3 palos. En la cancha, elegí el palo para llegar al fondo del green: la mayoría de los amateurs se queda corto, así que casi siempre es un palo más.'],
+    m:'Metros de la bola del medio con el hierro 7',better:'none'},
+  calor:{t:'Calentamiento como el hoyo 1',area:'Antes de jugar',min:10,cerca:false,
+    how:['Las últimas 5 bolas del calentamiento pegalas con el palo de la salida del hoyo 1, con tu rutina completa, como si te estuvieran mirando.','Elegí un objetivo chico, no la calle entera.','Antes de colocarte, soltá el aire despacio dos veces.'],
+    m:null,auto:'En la reflexión de la vuelta vas a anotar si hiciste tu rutina.'},
+  vuelta:{t:'Vuelta al centro del green',area:'Estrategia en la cancha',min:0,cerca:false,
+    how:['Apuntá siempre al centro del green, aunque la bandera esté en una esquina, y tomá un palo más: los fallos de los amateurs son casi siempre cortos.','Si fallás, que sea hacia el lado donde puedas rodar la bola. Después de un mal hoyo, el golpe aburrido.','Aplicá la rutina de 3 pasos en cada golpe cerca del green: decidir y elegir el punto de bote, la "foto" y 1 o 2 ensayos, y compromiso total (si dudás, salí y empezá de nuevo).'],
+    m:null,auto:'La app mide tus dobles bogeys o peor con la tarjeta.'}
+};
+function weekKey(){ var d=new Date(), t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())); var day=t.getUTCDay()||7; t.setUTCDate(t.getUTCDate()+4-day); var y=new Date(Date.UTC(t.getUTCFullYear(),0,1)); return t.getUTCFullYear()+'-S'+Math.ceil(((t-y)/86400000+1)/7); }
+function trainState(){ var tr=S.profile.train||(S.profile.train={log:[],week:null,done:{}}); if(!tr.log) tr.log=[]; if(tr.week!==weekKey()){ tr.week=weekKey(); tr.done={}; } return tr; }
+function trainAnalysis(){
+  var all=sortedRounds().filter(function(r){return r.status!=='en_curso'&&totals(r).n>0;}), play=all.filter(function(r){return tipoOf(r)!=='practica';}), rs=(play.length?play:all).slice(0,10);
+  if(!rs.length) return null;
+  var A=aggregate(rs), L=lossSplit(rs), r18=L.holes/18||1, areas=[];
+  var salPct=A.sal.n?A.sal.ok/A.sal.n:null;
+  var salCost=(A.sal.okN&&A.sal.noN)?(A.sal.noN/r18)*(A.sal.noRel/A.sal.noN-A.sal.okRel/A.sal.okN):(A.sal.n?(A.sal.n-A.sal.ok)/r18*0.7:0);
+  areas.push({k:'salida',cost:Math.max(0,salCost),txt:salPct==null?'':'Salidas en juego: '+Math.round(100*salPct)+'% en par 4 y 5.'});
+  var disR=L.holes?L.dis/r18:0; areas.push({k:'dis',cost:L.holes?L.disCost/r18:0,txt:'Dobles bogeys o peor: '+f1(disR)+' cada 18 hoyos.'});
+  var cAvg=A.c.n?A.c.sum/A.c.n:null, c2=A.c.n?((A.c.dist['0']||0)+(A.c.dist['1']||0)+(A.c.dist['2']||0))/A.c.n:null;
+  var pAvg=A.putts.n?A.putts.sum/A.putts.n:null, apAvg=A.ap.n?A.ap.sum/A.ap.n:null;
+  var cerCost=L.n?Math.max(0,L.cerca*18/L.n):0, puttShare=(pAvg!=null&&cAvg)?Math.min(1,Math.max(0,(pAvg-1.6)/Math.max(0.1,cAvg-2+0.6))):0.4;
+  areas.push({k:'putt',cost:cerCost*puttShare,txt:pAvg==null?'Cargá los putts para separar putter de approach.':'Putts por hoyo: '+f1(pAvg)+'.'});
+  areas.push({k:'corto',cost:cerCost*(1-puttShare),txt:cAvg==null?'':'Golpes de cerca por hoyo: '+f1(cAvg)+(c2!=null?' ('+Math.round(100*c2)+'% en 2 o menos)':'')+(apAvg!=null?'; approach: '+f1(apAvg)+' por hoyo':'')+'.'});
+  areas.sort(function(a,b){return b.cost-a.cost;});
+  var lv=curHcp(), focus=lv==null?null:(lv>30?'salida':lv>=15?'dis':'corto');
+  return {rs:rs,areas:areas,focus:focus,lv:lv,A:A};
+}
+var AREA_N={salida:'Salida',dis:'Desastres (dobles o peor)',putt:'Putt corto',corto:'Juego corto, chip y pitch'};
+function weekPlan(an){
+  var top=an?an.areas.filter(function(a){return a.cost>0.3;}).slice(0,2).map(function(a){return a.k;}):[];
+  var tr=trainState(), lastTest=tr.log.filter(function(x){return x.id==='test100';}).map(function(x){return x.date;}).sort().pop();
+  var plan=[];
+  if(!lastTest||dnum(today())-dnum(lastTest)>=28) plan.push('test100');
+  if(an&&(an.focus==='salida'||top[0]==='salida')) plan.push('salida');
+  plan.push(top.indexOf('putt')>=0?'putt':'mapa');
+  plan.push('vuelo','decidir');
+  var lastD=tr.log.filter(function(x){return x.id==='dist7';}).map(function(x){return x.date;}).sort().pop();
+  if(!lastD||dnum(today())-dnum(lastD)>=60) plan.push('dist7');
+  plan.push('calor','vuelta');
+  return {ids:plan,top:top};
+}
+function drillHistory(id){ return trainState().log.filter(function(x){return x.id===id;}).sort(function(a,b){return a.date<b.date?-1:1;}); }
+function vTrain(){
+  var an=trainAnalysis(), tr=trainState(), wp=weekPlan(an);
+  var html='<header class="top"><div><h1>Entrenar</h1><p class="sub">Según tus tarjetas, tus sensaciones y los videos de Mikel Bustamante</p></div></header>';
+  var lastR=sortedRounds().filter(function(r){return r.status!=='en_curso'&&totals(r).n>0;})[0];
+  if(lastR&&!reflDone(lastR)) html+='<section class="block" style="border-color:var(--flag)"><h3>Primero, reflexioná tu última vuelta</h3><p class="small muted" style="margin:4px 0 10px">'+esc(lastR.courseName)+', '+fdate(lastR.date)+'. Dos minutos sobre cómo te sentiste, la confianza, los nervios y qué pasó en los hoyos difíciles.</p><button class="btn flag" data-a="reflect" data-id="'+lastR.id+'">Reflexionar ahora</button></section>';
+  else if(lastR){ var tps=reflTips(lastR); if(tps.length) html+='<section class="block"><h3>De tu última reflexión</h3><ul style="margin:6px 0 0;padding-left:18px">'+tps.map(function(x){return '<li style="margin-bottom:6px">'+x.txt+'</li>';}).join('')+'</ul></section>'; }
+  if(!an) html+='<div class="note">Cargá al menos una vuelta con Salida, A green y Cerca, y acá te armo el plan. Mientras tanto, arrancá por la prueba de los 100 m.</div>';
+  else {
+    var lvTxt=an.lv==null?'':(an.lv>30?'Con '+hf(an.lv)+' de handicap, los videos ponen el foco en la salida: antes que el putter, un palo que te deje la bola en juego.':an.lv>=15?'Entre 15 y 30 de handicap, los videos ponen el foco en evitar los desastres: centro del green y fallar donde puedas rodar.':'Con menos de 15, el foco pasa al juego corto y a los putts de 1 a 2 m.');
+    var top=an.areas[0];
+    html+='<section class="block"><h2 style="margin-bottom:6px">Tu prioridad</h2><p style="margin-bottom:8px">En tus tarjetas, lo que más golpes te cuesta hoy es <b>'+AREA_N[top.k].toLowerCase()+'</b>'+(top.cost>0?', unos <b>'+f1(top.cost)+' golpes</b> cada 18 hoyos':'')+'.</p>'+
+      '<table class="tbl"><tbody>'+an.areas.map(function(a){return '<tr><td style="white-space:normal">'+AREA_N[a.k]+'<br><span class="small muted">'+a.txt+'</span></td><td>'+(a.cost>0?f1(a.cost)+' golpes':'–')+'</td></tr>';}).join('')+'</tbody></table>'+
+      '<p class="small muted" style="margin-top:8px">Cálculo aproximado sobre tus últimas '+an.rs.length+(an.rs.length===1?' vuelta':' vueltas')+(an.rs.length<3?'. Con 3 o 4 vueltas el diagnóstico ya es confiable':'')+'.</p>'+
+      (lvTxt?'<div class="note" style="margin:10px 0 0">'+lvTxt+'</div>':'')+'</section>';
+  }
+  html+=headBlock();
+  var ids=wp.ids, doneN=ids.filter(function(id){return tr.done[id];}).length, cercaMin=0, totMin=0;
+  ids.forEach(function(id){ var d=DRILLS[id]; totMin+=d.min; if(d.cerca) cercaMin+=d.min; });
+  html+='<section style="margin:16px 0 8px"><div class="row"><h2>Plan de esta semana</h2><span class="small muted">'+doneN+' de '+ids.length+' hechas</span></div><p class="small muted" style="margin-top:4px">'+Math.round(100*cercaMin/Math.max(1,totMin))+'% del tiempo a menos de 100 m. La regla de Mikel: por lo menos la mitad del entrenamiento, ahí.</p></section>';
+  ids.forEach(function(id,i){ var d=DRILLS[id], h=drillHistory(id), last=h[h.length-1], prev=h[h.length-2];
+    var trend=''; if(last&&prev&&d.better){ var diff=last.v-prev.v, good=d.better==='up'?diff>0:diff<0; if(d.better==='none') trend=''; else trend=diff===0?' (igual que la vez anterior)':' <span style="color:'+(good?'var(--green)':'var(--red)')+'">('+(diff>0?'+':'−')+Math.abs(diff)+' vs. la anterior)</span>'; }
+    html+='<section class="block"><div class="row" style="align-items:flex-start"><div><p class="small muted">'+(id==='vuelta'?'En la vuelta':id==='calor'?'Antes de jugar':'Sesión '+(i+1))+' · '+d.area+(d.min?' · '+d.min+' min':'')+'</p><h3 style="margin-top:2px">'+d.t+'</h3></div>'+
+      '<button class="chip" aria-pressed="'+(tr.done[id]?'true':'false')+'" data-a="trDone" data-id="'+id+'">'+(tr.done[id]?'Hecha':'Marcar hecha')+'</button></div>'+
+      '<ol style="margin:8px 0 0;padding-left:20px">'+d.how.map(function(x){return '<li style="margin-bottom:4px">'+x+'</li>';}).join('')+'</ol>'+
+      (d.adapt?'<p class="small muted" style="margin-top:6px">Ejercicio armado a partir de la recomendación del video para handicap de más de 30.</p>':'')+
+      (d.m?'<div class="row" style="justify-content:flex-start;flex-wrap:wrap;margin-top:10px"><label class="small muted" for="tr_'+id+'" style="flex-basis:100%">'+d.m+(d.better==='up'?' (más es mejor)':d.better==='down'?' (menos es mejor)':'')+'</label><input id="tr_'+id+'" class="narrow" type="number" inputmode="numeric" min="0" max="200" aria-label="'+d.m+'"><button class="btn quiet" data-a="trLog" data-id="'+id+'">Anotar</button></div>'+
+        (last?'<p class="small" style="margin-top:6px">Último: <b>'+last.v+'</b> el '+fdate(last.date)+trend+(h.length>2?' · '+h.length+' registros':'')+'</p>':''):'<p class="small muted" style="margin-top:8px">'+d.auto+'</p>')+
+      '</section>'; });
+  html+='<p class="small muted" style="margin:12px 4px 0">Ejercicios tomados de los videos de <a href="https://www.youtube.com/@soymikelbustamante" target="_blank" rel="noopener" style="color:var(--green)">Mikel Bustamante</a> que cargaste en tu cuaderno de NotebookLM.</p>';
+  return html+tabs();
+}
+
+/* ---------- Cancha y ajustes ---------- */
+function vCourse(){
+  var c=courseById(UI.courseId)||S.profile.courses[0]; UI.courseId=c.id;
+  var html='<header class="top"><h1>Cancha</h1><span class="sync">'+syncText()+'</span></header>';
+  html+='<section class="block"><h3>Tu handicap de juego habitual</h3><div class="row" style="justify-content:flex-start"><input class="narrow" type="number" inputmode="numeric" min="0" max="54" data-c="hcp" value="'+(S.profile.hcp==null?'':S.profile.hcp)+'" aria-label="Handicap de juego habitual"><p class="small muted">Se propone en cada vuelta nueva.</p></div></section>';
+  html+='<section class="block"><h3>Tarjeta de la cancha</h3><div class="chips" style="margin-bottom:10px">'+S.profile.courses.map(function(x){return chip(esc(x.name),x.id===c.id,'data-a="pickCourse" data-id="'+x.id+'"');}).join('')+chip('Agregar cancha',false,'data-a="addCourse"')+'</div>'+
+    '<label class="f" for="cname">Nombre</label><input id="cname" type="text" data-c="cname" value="'+esc(c.name)+'" style="margin-bottom:10px">'+
+    '<table class="edit"><thead><tr><th>Hoyo</th><th>Par</th><th>Handicap</th><th>Yardas caballeros</th><th>Yardas damas</th></tr></thead><tbody>'+c.holes.map(function(h){ function inp(k,min,max){ return '<td><input type="number" inputmode="numeric" min="'+min+'" max="'+max+'" data-c="hole" data-n="'+h.n+'" data-k="'+k+'" value="'+(h[k]==null?'':h[k])+'" aria-label="'+k+' del hoyo '+h.n+'"></td>'; }
+      return '<tr><td>'+h.n+'</td>'+inp('par',3,6)+inp('si',1,18)+inp('ydH',50,700)+inp('ydD',50,700)+'</tr>'; }).join('')+'</tbody></table>'+
+    '<p class="small muted" id="ctot" style="margin-top:8px">'+courseTotals(c)+'</p>'+
+    '<p class="small muted" style="margin-top:6px">Los cambios valen para las vueltas nuevas; las ya jugadas conservan su tarjeta.</p>'+
+    (S.profile.courses.length>1?'<button class="btn danger" style="margin-top:10px" data-a="delCourse">'+(UI.confirmDel==='c:'+c.id?'Tocá de nuevo para quitarla':'Quitar esta cancha')+'</button>':'')+'</section>';
+  html+='<section class="block"><h3>Tus datos</h3><p class="small muted" style="margin-bottom:10px">Tus vueltas se guardan solo en este celular. Descargá una copia de seguridad cada tanto y guardala en Drive o mandatela por mail: con ella recuperás todo en otro teléfono.'+(S.profile.lastBackup?' Última copia: '+fdate(S.profile.lastBackup)+'.':'')+'</p>'+
+    '<div class="stack"><button class="btn primary" style="width:100%" data-a="backup">Descargar copia de seguridad</button>'+
+    '<button class="btn quiet" style="width:100%" data-a="restore">Restaurar desde una copia</button>'+
+    (Object.keys(S.rounds).length?'<button class="btn quiet" style="width:100%" data-a="csv">Descargar las vueltas en CSV (Excel)</button>':'')+'</div></section>';
+  return html+tabs();
+}
+function courseTotals(c){ var p=0,a=0,b=0; c.holes.forEach(function(h){p+=h.par||0;a+=h.ydH||0;b+=h.ydD||0;}); return 'Par '+p+', '+a.toLocaleString('es-AR')+' yardas caballeros, '+b.toLocaleString('es-AR')+' yardas damas.'; }
+function csv(){
+  var rows=[['fecha','tipo','cancha','hoyo','par','handicap_hoyo','yardas','golpes','golpes_recibidos','salida_en_juego','salida_lado','green_metros','en_green','cerca','putts','putts_cortos_menos_1m','penales','salida_metros_gps','animo','rutina']];
+  sortedRounds().reverse().forEach(function(r){ var rc=recvMap(r.holes,r.hcp); r.holes.forEach(function(h){ var d=r.scores[h.n]; if(!d) return;
+    rows.push([r.date,TIPOS[tipoOf(r)],r.courseName,h.n,h.par,h.si,h.yd||'',d.s==null?'':d.s,rc[h.n]||0,d.sal==null?'':(d.sal?'si':'no'),d.lado||'',d.gd==null?'':d.gd,d.ge==null?'':(d.ge?'si':'no'),d.c==null?'':d.c,d.p==null?'':d.p,d.pc==null?'':d.pc,d.pen==null?'':d.pen,(h.par>3&&d.pts&&d.pts.length>=2)?hav(d.pts[0],d.pts[1]):'',d.an?ANIMO[d.an].toLowerCase():'',d.rut==null?'':(d.rut?'si':'no')]); }); });
+  var text='\ufeff'+rows.map(function(r){return r.map(function(v){v=String(v);return /[",;\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}).join(';');}).join('\r\n');
+  saveFile('mis-vueltas-de-golf.csv',text,'text/csv;charset=utf-8'); toast('CSV descargado');
+}
+
+/* ---------- Render y eventos ---------- */
+var app=document.getElementById('app');
+/* ---------- Copias, importación y archivos ---------- */
+function saveFile(name,text,type){
+  var b=new Blob([text],{type:type}), u=URL.createObjectURL(b), a=document.createElement('a');
+  a.href=u; a.download=name; document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(u); a.remove(); },1500);
+}
+// Suma los datos de otra copia: gana la versión más reciente de cada vuelta y del perfil.
+function importData(d){
+  if(!d||!d.profile||!Array.isArray(d.profile.courses)||typeof d.rounds!=='object') return -1;
+  var n=0, del={}; (S.profile.deleted||[]).concat(d.profile.deleted||[]).forEach(function(x){del[x]=1;});
+  var fresh=!Object.keys(S.rounds).length, oldP=S.profile;
+  if(fresh||(d.profile.updatedAt||0)>=(S.profile.updatedAt||0)){ var lb=oldP.lastBackup; S.profile=clone(d.profile); if(lb&&!S.profile.lastBackup) S.profile.lastBackup=lb; }
+  // No perder greens marcados con GPS en ninguna de las dos copias.
+  [oldP,d.profile].forEach(function(src){ (src.courses||[]).forEach(function(c){ var me=courseById(c.id); if(!me) return;
+    (c.holes||[]).forEach(function(h){ if(!h.green) return; var mh=me.holes.filter(function(x){return x.n===h.n;})[0]; if(mh&&!mh.green) mh.green=h.green; }); }); });
+  S.profile.deleted=Object.keys(del).slice(-300);
+  Object.keys(d.rounds).forEach(function(id){ var r=d.rounds[id]; if(!r||del[id]) return; var loc=S.rounds[id];
+    if(!loc||(r.updatedAt||0)>=(loc.updatedAt||0)){ S.rounds[id]=r; n++; } });
+  ensureBuiltins(); saveLocal(); UI.view='home'; render(); return n;
+}
+function b64urlToBytes(t){ t=t.replace(/-/g,'+').replace(/_/g,'/'); while(t.length%4) t+='='; var bin=atob(t), u=new Uint8Array(bin.length); for(var i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i); return u; }
+// Link de mudanza desde la versión de claude.ai: #importar=<datos comprimidos>
+function importFromHash(){
+  var m=location.hash.match(/^#importar=([A-Za-z0-9_-]+)$/); if(!m) return;
+  history.replaceState(null,'',location.pathname+location.search);
+  if(typeof DecompressionStream!=='function'){ toast('Actualizá el navegador para traer tus vueltas'); return; }
+  var st=new Blob([b64urlToBytes(m[1])]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+  new Response(st).text().then(function(t){ var n=importData(JSON.parse(t)); toast(n<0?'No pude leer tus vueltas':'Listo: trajiste '+n+(n===1?' vuelta':' vueltas')); })
+    .catch(function(){ toast('No pude leer tus vueltas'); });
+}
+function render(){
+  var v=UI.view, html=v==='setup'?vSetup():v==='round'?vRound():v==='card'?vCard():v==='history'?vHistory():v==='stats'?vStats():v==='hcp'?vHcp():v==='train'?vTrain():v==='reflect'?vReflect():v==='course'?vCourse():vHome();
+  app.className=UI.view==='round'?'inround':'';
+  app.innerHTML=html;
+  if(UI.view==='round'&&G.on) paintGps();
+  if(UI.view==='round'){ var s=document.getElementById('strip'), cur=s&&s.querySelector('[aria-current="true"]'); if(cur) s.scrollLeft=cur.offsetLeft-s.clientWidth/2+cur.offsetWidth/2; }
+}
+/* ---------- GPS ---------- */
+var G={on:false,watch:null,pos:null,err:null};
+function hav(a,b){ var R=6371000,toR=Math.PI/180,dLa=(b.lat-a.lat)*toR,dLo=(b.lng-a.lng)*toR,x=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(a.lat*toR)*Math.cos(b.lat*toR)*Math.sin(dLo/2)*Math.sin(dLo/2); return Math.round(2*R*Math.asin(Math.sqrt(x))); }
+function courseHole(r,n){ var c=courseById(r.courseId); return c?c.holes.filter(function(x){return x.n===n;})[0]:null; }
+function greenOf(r,n){ var h=courseHole(r,n); return h&&h.green?h.green:null; }
+function gpsStart(){
+  G.err=null;
+  if(!navigator.geolocation){ G.err='Este navegador no da la ubicación.'; render(); return; }
+  try{
+    G.on=true;
+    G.watch=navigator.geolocation.watchPosition(function(p){ G.pos={lat:p.coords.latitude,lng:p.coords.longitude,acc:Math.round(p.coords.accuracy||0),t:Date.now()}; paintGps(); },
+      function(e){ if(e&&e.code===1){ G.err='El celular no le da tu ubicación a la app. Habilitá la ubicación para este sitio en el navegador (en Safari: aA › Configuración del sitio web › Ubicación) y volvé a tocar Activar.'; gpsStop(); render(); return; }
+        var aEl=document.getElementById('gpsAcc'); if(aEl&&!G.pos){ aEl.textContent='Sin señal por ahora. Seguí al aire libre unos segundos.'; aEl.className='gpsacc warn'; } },
+      {enableHighAccuracy:true,maximumAge:3000,timeout:30000});
+  }catch(e){ G.err='Este navegador no da la ubicación.'; G.on=false; }
+  clearTimeout(G.slow); G.slow=setTimeout(function(){ if(G.on&&!G.pos){ var aEl=document.getElementById('gpsAcc'); if(aEl){ aEl.textContent='Todavía sin ubicación. Revisá que la ubicación del celular esté prendida y que el navegador tenga permiso.'; aEl.className='gpsacc warn'; } } },12000);
+  render();
+}
+function gpsStop(){ if(G.watch!=null){ try{navigator.geolocation.clearWatch(G.watch);}catch(e){} } G.watch=null; G.on=false; G.pos=null; }
+function paintGps(){
+  if(UI.view!=='round') return; var r=S.rounds[UI.roundId]; if(!r) return;
+  var gEl=document.getElementById('gpsGreen'), aEl=document.getElementById('gpsAcc'), gr=greenOf(r,UI.hole);
+  if(gEl) gEl.textContent=(G.pos&&gr)?hav(G.pos,gr):'–';
+  if(aEl){ if(G.pos){ aEl.textContent='Precisión del GPS: ±'+G.pos.acc+' m'+(G.pos.acc>20?'. Esperá unos segundos para que mejore.':''); aEl.className='gpsacc'+(G.pos.acc>20?' warn':''); } else { aEl.textContent='Buscando señal…'; aEl.className='gpsacc'; } }
+  document.querySelectorAll('[data-gpsneed]').forEach(function(b){ b.disabled=!G.pos; });
+}
+function gpsSection(r,h,d){
+  var gr=greenOf(r,h.n), pts=d.pts||[];
+  var html='<section class="stat" id="gpssec"><div class="row"><div><h3>GPS</h3><p class="hint">'+(G.on?'Distancias desde donde estás parado':'Distancia al green y largo de cada golpe')+'</p></div>'+
+    (G.on?'<button class="btn quiet" data-a="gpsOff">Apagar</button>':'<button class="btn primary" data-a="gpsOn">Activar</button>')+'</div>';
+  if(G.err) html+='<p class="small" style="color:var(--red);margin-top:8px">'+G.err+'</p>';
+  if(G.on){
+    html+=gr?'<div class="gpsbig"><b id="gpsGreen">–</b><span>metros al centro del green</span></div>':'<p class="small muted" style="margin-top:8px">Todavía no marcaste el green de este hoyo. Cuando estés parado en el centro del green, tocá <b>Marcar green</b> y la app lo recuerda para las próximas vueltas.</p>';
+    html+='<p class="gpsacc" id="gpsAcc">Buscando señal…</p>';
+    html+='<div class="gpsbtns"><button class="btn primary" data-a="gpsMark" data-gpsneed disabled>Marcar bola acá</button><button class="btn quiet" data-a="gpsGreen" data-gpsneed disabled>'+(gr?'Corregir green':'Marcar green')+'</button></div>';
+    if(!pts.length) html+='<p class="small muted" style="margin-top:8px">Marcá en la salida y después en cada lugar donde quede la bola: la app mide cada golpe.</p>';
+  }
+  if(pts.length){
+    html+='<ul class="shots">';
+    for(var i=1;i<pts.length;i++){ html+='<li><span>Golpe '+i+(i===1&&h.par>3?', salida':'')+'</span><b>'+hav(pts[i-1],pts[i])+' m</b></li>'; }
+    var last=pts[pts.length-1];
+    if(gr){ var dg=hav(last,gr); html+='<li><span>De la última marca al green</span><b>'+dg+' m</b></li>'; }
+    html+='</ul><div class="chips" style="margin-top:10px">'+(gr?'<button class="chip" data-a="gpsUseGd">Usar '+hav(last,gr)+' m como A green</button>':'')+'<button class="chip" data-a="gpsUndo">Borrar última marca</button></div>';
+  }
+  return html+'</section>';
+}
+function go(v){ if(v!=='round'&&G.on) gpsStop(); UI.view=v; UI.confirmDel=null; UI.dnote=''; render(); window.scrollTo(0,0); }
+function curRound(){ return S.rounds[UI.roundId]; }
+function keepDict(){ var el=document.getElementById('dict'); if(el) UI.dict=el.value; }
+var ACT={
+  nav:function(el){ go(el.dataset.v); },
+  newRound:function(){ var c=S.profile.courses[0]; UI.setup={courseId:c.id,tee:'H',part:'h1',format:'golpes',tipo:'amigos',hcp:S.profile.hcp,players:[],date:today()}; go('setup'); },
+  su:function(el){ UI.setup[el.dataset.k]=el.dataset.v; if(el.dataset.k==='courseId') UI.setup.part='h1'; render(); },
+  suAddP:function(){ UI.setup.players.push({name:'',hcp:null}); render(); },
+  suDelP:function(el){ UI.setup.players.splice(+el.dataset.i,1); render(); },
+  start:function(){
+    var su=UI.setup, c=courseById(su.courseId)||S.profile.courses[0];
+    var ord=c.holes.slice(); if(c.holes.length>=18&&su.part==='h10') ord=ord.filter(function(h){return h.n>=10;}).concat(ord.filter(function(h){return h.n<10;}));
+    var hs=ord.map(function(h){ return {n:h.n,par:h.par,si:h.si,yd:su.tee==='D'?h.ydD:h.ydH}; });
+    var r={id:uid(),date:su.date||today(),courseId:c.id,courseName:c.name,tee:su.tee,format:su.format,tipo:su.tipo||'amigos',hcp:su.hcp==null?0:su.hcp,holes:hs,scores:{},others:{},
+      players:su.players.filter(function(p){return (p.name||'').trim();}).map(function(p,i){return {id:'p'+(i+1),name:p.name.trim().slice(0,24),hcp:p.hcp||0};}),status:'en_curso',createdAt:Date.now(),updatedAt:Date.now()};
+    S.rounds[r.id]=r; if(su.hcp!=null&&su.hcp!==S.profile.hcp){ S.profile.hcp=su.hcp; S.profile.updatedAt=Date.now(); markDirty('profile'); }
+    markDirty('r_'+r.id); UI.roundId=r.id; UI.hole=hs[0].n; UI.more=false; UI.dict=''; go('round');
+  },
+  resume:function(el){ var r=S.rounds[el.dataset.id]; if(!r) return; UI.roundId=r.id; UI.hole=firstPending(r); UI.dict=''; go('round'); },
+  openRound:function(el){ UI.roundId=el.dataset.id; go('card'); },
+  editRound:function(){ var r=curRound(); if(!r) return; UI.hole=r.holes[0].n; UI.dict=''; go('round'); },
+  card:function(){ keepDict(); go('card'); },
+  finish:function(){ var r=curRound(); if(!r) return;
+    var pl=r.holes.filter(function(h){return (r.scores[h.n]||{}).s!=null;});
+    if(pl.length&&pl.length<r.holes.length){ r.holes=pl; Object.keys(r.scores).forEach(function(k){ if(!pl.some(function(h){return h.n===+k;})) delete r.scores[k]; }); }
+    r.status='terminada'; touch(r); toast('Vuelta guardada'+(pl.length&&pl.length<18?', '+pl.length+' hoyos':'')); go('reflect'); },
+  delRound:function(){ var r=curRound(); if(!r) return;
+    if(UI.confirmDel!==r.id){ UI.confirmDel=r.id; render(); return; }
+    delete S.rounds[r.id]; S.profile.deleted=(S.profile.deleted||[]).concat(r.id).slice(-300); S.profile.updatedAt=Date.now(); delete dirty['r_'+r.id];
+    markDirty('profile'); markDirty('del:r_'+r.id); UI.roundId=null; toast('Vuelta borrada'); go('history'); },
+  goto:function(el){ keepDict(); var r=curRound(), n=+el.dataset.n, b=bloqueo(r,n); if(b!=null){ avisarFalta(r,b); return; } UI.hole=n; UI.dnote=''; render(); },
+  prev:function(){ keepDict(); var r=curRound(), i=r.holes.findIndex(function(h){return h.n===UI.hole;}); if(i>0){ UI.hole=r.holes[i-1].n; UI.dnote=''; render(); window.scrollTo(0,0); } },
+  next:function(){ keepDict(); var r=curRound(), i=r.holes.findIndex(function(h){return h.n===UI.hole;}); if(i<r.holes.length-1){ var b=bloqueo(r,r.holes[i+1].n); if(b!=null){ avisarFalta(r,b); return; } UI.hole=r.holes[i+1].n; UI.dnote=''; render(); window.scrollTo(0,0); } },
+  gpsOn:function(){ keepDict(); gpsStart(); },
+  gpsOff:function(){ keepDict(); gpsStop(); render(); },
+  gpsMark:function(){ keepDict(); var r=curRound(); if(!r||!G.pos) return; var d=r.scores[UI.hole]||{}, pts=(d.pts||[]).slice();
+    pts.push({lat:+G.pos.lat.toFixed(6),lng:+G.pos.lng.toFixed(6)}); if(pts.length>15) pts=pts.slice(-15);
+    setHole(r,UI.hole,{pts:pts}); var n=pts.length; toast(n===1?'Salida marcada':'Golpe '+(n-1)+': '+hav(pts[n-2],pts[n-1])+' m'); },
+  gpsUndo:function(){ keepDict(); var r=curRound(); if(!r) return; var d=r.scores[UI.hole]||{}, pts=(d.pts||[]).slice(0,-1); setHole(r,UI.hole,{pts:pts.length?pts:null}); },
+  gpsGreen:function(){ keepDict(); var r=curRound(); if(!r||!G.pos) return; var h=courseHole(r,UI.hole);
+    if(!h){ toast('Esta cancha ya no está en tu lista: no puedo guardar el green.'); return; }
+    var prev=h.green?{lat:h.green.lat,lng:h.green.lng}:null, n=UI.hole;
+    h.green={lat:+G.pos.lat.toFixed(6),lng:+G.pos.lng.toFixed(6)}; S.profile.updatedAt=Date.now(); markDirty('profile'); render();
+    toast('Green del hoyo '+n+' guardado',{label:'Deshacer',fn:function(){ if(prev) h.green=prev; else delete h.green; S.profile.updatedAt=Date.now(); markDirty('profile'); render(); }}); },
+  gpsUseGd:function(){ keepDict(); var r=curRound(); if(!r) return; var d=r.scores[UI.hole]||{}, pts=d.pts||[], gr=greenOf(r,UI.hole); if(!pts.length||!gr) return;
+    var v=Math.max(1,Math.min(350,hav(pts[pts.length-1],gr))); setHole(r,UI.hole,{gd:v}); toast('A green: '+v+' m'); },
+  inc:function(el){ step(el,1); }, dec:function(el){ step(el,-1); },
+  sal:function(el){ keepDict(); var r=curRound(), d=r.scores[UI.hole]||{}, v=el.dataset.v, cur=d.sal===true?'ok':d.sal===false?(d.lado||'no'):null;
+    if(cur===v) setHole(r,UI.hole,{sal:null,lado:null}); else if(v==='ok') setHole(r,UI.hole,{sal:true,lado:null}); else setHole(r,UI.hole,{sal:false,lado:v}); },
+  an:function(el){ keepDict(); var r=curRound(), d=r.scores[UI.hole]||{}, v=el.dataset.v; setHole(r,UI.hole,{an:d.an===v?null:v}); },
+  rut:function(el){ keepDict(); var r=curRound(), d=r.scores[UI.hole]||{}, v=el.dataset.v==='1'; setHole(r,UI.hole,{rut:d.rut===v?null:v}); },
+  ge:function(el){ keepDict(); var r=curRound(), d=r.scores[UI.hole]||{}, v=el.dataset.v==='1'; setHole(r,UI.hole,{ge:d.ge===v?null:v}); },
+  gd:function(el){ keepDict(); var r=curRound(), d=r.scores[UI.hole]||{}, v=+el.dataset.v; setHole(r,UI.hole,{gd:d.gd===v?null:v}); },
+  gdStep:function(el){ keepDict(); var r=curRound(), d=r.scores[UI.hole]||{}, h=r.holes.filter(function(x){return x.n===UI.hole;})[0];
+    var base=d.gd!=null?d.gd:(h.par===3&&h.yd?ydToM(h.yd):120); var v=d.gd==null?base:Math.max(1,Math.min(350,base+(+el.dataset.v))); setHole(r,UI.hole,{gd:v}); },
+  dictar:function(){ runDictado(); }, askClaude:function(){ askClaude(); }, mic:function(){ keepDict(); toggleMic(); },
+  range:function(el){ UI.range=el.dataset.v; render(); },
+  tipoF:function(el){ UI.tipo=el.dataset.v; UI.range='all'; render(); },
+  setTipo:function(el){ var r=curRound(); if(!r) return; r.tipo=el.dataset.v; touch(r); render(); toast('Vuelta marcada como '+TIPOS[r.tipo].toLowerCase()); },
+  pickCourse:function(el){ UI.courseId=el.dataset.id; UI.confirmDel=null; render(); },
+  addCourse:function(){ var c={id:'c'+uid(),name:'Cancha nueva',holes:[]}; for(var i=1;i<=18;i++) c.holes.push({n:i,par:4,si:i,ydH:380,ydD:330});
+    S.profile.courses.push(c); S.profile.updatedAt=Date.now(); markDirty('profile'); UI.courseId=c.id; render(); },
+  delCourse:function(){ var id=UI.courseId; if(S.profile.courses.length<2) return; if(UI.confirmDel!=='c:'+id){ UI.confirmDel='c:'+id; render(); return; }
+    S.profile.courses=S.profile.courses.filter(function(c){return c.id!==id;}); S.profile.updatedAt=Date.now(); markDirty('profile'); UI.courseId=S.profile.courses[0].id; UI.confirmDel=null; render(); },
+  csv:function(){ csv(); },
+  backup:function(){ var d=new Date(), name='bajando-mi-handicap-'+today()+'.json';
+    S.profile.lastBackup=today(); saveLocal();
+    saveFile(name,JSON.stringify({app:'bajando-mi-handicap',v:1,exportedAt:d.toISOString(),data:S}),'application/json'); toast('Copia descargada'); render(); },
+  restore:function(){ var inp=document.createElement('input'); inp.type='file'; inp.accept='.json,application/json';
+    inp.onchange=function(){ var f=inp.files&&inp.files[0]; if(!f) return; var rd=new FileReader();
+      rd.onload=function(){ try{ var j=JSON.parse(rd.result); var n=importData(j&&j.data?j.data:j); toast(n<0?'Ese archivo no es una copia de la app':'Listo: '+n+(n===1?' vuelta recuperada':' vueltas recuperadas')); }catch(e){ toast('No pude leer ese archivo'); } };
+      rd.readAsText(f); };
+    inp.click(); },
+  hlAdd:function(){ var dt=document.getElementById('hlDate').value, v=parseFloat(String(document.getElementById('hlVal').value).replace(',','.'));
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(dt)||isNaN(v)||v<0||v>54){ toast('Cargá una fecha y un handicap entre 0 y 54'); return; }
+    v=Math.round(v*10)/10; var l=(S.profile.hcpLog||[]).filter(function(x){return x.date!==dt;}); l.push({date:dt,v:v}); S.profile.hcpLog=l;
+    var last=hcpLog(); S.profile.hcp=Math.round(last[last.length-1].v); saveProfile(); render(); toast('Handicap '+hf(v)+' guardado'); },
+  reflect:function(el){ if(el.dataset.id) UI.roundId=el.dataset.id; go('reflect'); },
+  rf:function(el){ var r=curRound(); if(!r) return; var f=Object.assign({},refl(r)), v=+el.dataset.v; f[el.dataset.k]=f[el.dataset.k]===v?null:v; r.refl=f; touch(r); render(); },
+  rfm:function(el){ var r=curRound(); if(!r) return; var f=Object.assign({},refl(r)), k=el.dataset.k, v=el.dataset.v, a=(f[k]||[]).slice(), i=a.indexOf(v);
+    if(i>=0) a.splice(i,1); else { if(v==='Ninguna') a=[]; else a=a.filter(function(x){return x!=='Ninguna';}); a.push(v); } f[k]=a; r.refl=f; touch(r); render(); },
+  rfh:function(el){ var r=curRound(); if(!r) return; var f=Object.assign({},refl(r)), hs=Object.assign({},f.holes||{}), n=el.dataset.n, h=Object.assign({},hs[n]||{}); h.err=h.err===el.dataset.v?null:el.dataset.v; hs[n]=h; f.holes=hs; r.refl=f; touch(r); render(); },
+  rfAsk:function(){ askReflect(); },
+  rf2:function(el){ var r=curRound(); if(!r) return; var f=Object.assign({},refl(r)); f[el.dataset.k]=f[el.dataset.k]===el.dataset.v?null:el.dataset.v; r.refl=f; touch(r); render(); },
+  rfh2:function(el){ var r=curRound(); if(!r) return; var f=Object.assign({},refl(r)), hs=Object.assign({},f.holes||{}), n=el.dataset.n, h=Object.assign({},hs[n]||{}), k=el.dataset.k; h[k]=h[k]===el.dataset.v?null:el.dataset.v; hs[n]=h; f.holes=hs; r.refl=f; touch(r); render(); },
+  trDone:function(el){ var tr=trainState(); tr.done[el.dataset.id]=!tr.done[el.dataset.id]; saveProfile(); render(); },
+  trLog:function(el){ var id=el.dataset.id, inp=document.getElementById('tr_'+id), v=parseInt(inp&&inp.value,10); if(isNaN(v)||v<0){ toast('Escribí el número'); return; }
+    var tr=trainState(); tr.log.push({id:id,date:today(),v:v}); if(tr.log.length>400) tr.log=tr.log.slice(-400); tr.done[id]=true; saveProfile(); render(); toast(DRILLS[id].t+': '+v+' anotado'); },
+  hlDel:function(el){ S.profile.hcpLog=(S.profile.hcpLog||[]).filter(function(x){return x.date!==el.dataset.date;}); saveProfile(); render(); },
+  goalAdd:function(){ var g=S.profile.goals||(S.profile.goals=[]); var d=new Date(); d.setMonth(d.getMonth()+3); g.push({date:d.toISOString().slice(0,10),v:Math.max(0,(curHcp()||20)-3)}); saveProfile(); render(); },
+  goalDel:function(el){ var g=goals(); g.splice(+el.dataset.i,1); S.profile.goals=g; saveProfile(); render(); }
+};
+function step(el,dir){
+  keepDict(); var r=curRound(); if(!r) return; var f=el.dataset.f, n=UI.hole, h=r.holes.filter(function(x){return x.n===n;})[0];
+  var m=document.getElementById('more'); if(m) UI.more=m.open;
+  if(f==='o'){ var pid=el.dataset.pid; r.others=r.others||{}; var o=r.others[pid]||(r.others[pid]={}); var cur=o[n];
+    var v=cur==null?(dir>0?h.par:h.par-1):cur+dir; if(v<1) delete o[n]; else o[n]=Math.min(20,v); touch(r); render(); return; }
+  var d=r.scores[n]||{}, c=d[f], nv;
+  if(f==='s'){ nv=c==null?(dir>0?h.par:h.par-1):c+dir; if(nv<1) nv=null; else nv=Math.min(20,nv); }
+  else if(f==='c'){ nv=c==null?(dir>0?2:0):c+dir; if(nv<0) nv=null; else nv=Math.min(15,nv); }
+  else if(f==='pc'){ UI.more=true; nv=c==null?(dir>0?1:0):c+dir; if(nv<0) nv=null; else nv=Math.min(10,nv); }
+  else { if(f==='pen') UI.more=true; nv=c==null?(dir>0?(f==='p'?2:1):0):c+dir; if(nv<0) nv=null; else nv=Math.min(f==='p'?10:9,nv); }
+  var patch={}; patch[f]=nv; setHole(r,n,patch);
+}
+function intOr(v,lo,hi){ var x=parseInt(v,10); if(isNaN(x)) return null; return Math.max(lo,Math.min(hi,x)); }
+var CHG={
+  gd:function(el){ var r=curRound(); if(!r) return; var v=intOr(el.value,1,350); setHole(r,UI.hole,{gd:v},true);
+    document.querySelectorAll('#gdchips .chip').forEach(function(c){ c.setAttribute('aria-pressed',(+c.dataset.v===v)?'true':'false'); }); },
+  suHcp:function(el){ UI.setup.hcp=intOr(el.value,0,54); },
+  suP:function(el){ var p=UI.setup.players[+el.dataset.i]; if(!p) return; if(el.dataset.k==='hcp') p.hcp=intOr(el.value,0,54); else p.name=el.value; },
+  suDate:function(el){ UI.setup.date=/^\d{4}-\d{2}-\d{2}$/.test(el.value)?el.value:today(); },
+  rft:function(el){ var r=curRound(); if(!r) return; var f=Object.assign({},refl(r)); f[el.dataset.k]=String(el.value||'').slice(0,200); r.refl=f; touch(r); },
+  rfhNote:function(el){ var r=curRound(); if(!r) return; var f=Object.assign({},refl(r)), hs=Object.assign({},f.holes||{}), n=el.dataset.n; hs[n]=Object.assign({},hs[n]||{},{note:String(el.value||'').slice(0,160)}); f.holes=hs; r.refl=f; touch(r); },
+  goal:function(el){ var g=goals(), x=g[+el.dataset.i]; if(!x) return; if(el.dataset.k==='date'){ if(/^\d{4}-\d{2}-\d{2}$/.test(el.value)) x.date=el.value; } else { var v=parseFloat(String(el.value).replace(',','.')); if(!isNaN(v)&&v>=0&&v<=54) x.v=Math.round(v*10)/10; } S.profile.goals=g; saveProfile(); render(); },
+  hcp:function(el){ S.profile.hcp=intOr(el.value,0,54); S.profile.updatedAt=Date.now(); markDirty('profile'); },
+  cname:function(el){ var c=courseById(UI.courseId); if(!c) return; c.name=(el.value||'').trim().slice(0,40)||'Cancha'; S.profile.updatedAt=Date.now(); markDirty('profile'); },
+  hole:function(el){ var c=courseById(UI.courseId); if(!c) return; var h=c.holes.filter(function(x){return x.n===+el.dataset.n;})[0]; if(!h) return;
+    var k=el.dataset.k, lim={par:[3,6],si:[1,18],ydH:[50,700],ydD:[50,700]}[k], v=intOr(el.value,lim[0],lim[1]); if(v==null){ el.value=h[k]; return; }
+    h[k]=v; el.value=v; S.profile.updatedAt=Date.now(); markDirty('profile'); var t=document.getElementById('ctot'); if(t) t.textContent=courseTotals(c); }
+};
+app.addEventListener('click',function(e){ var el=e.target.closest('[data-a]'); if(!el||el.disabled) return; var fn=ACT[el.dataset.a]; if(fn) fn(el); });
+app.addEventListener('change',function(e){ var el=e.target.closest('[data-c]'); if(!el) return; var fn=CHG[el.dataset.c]; if(fn) fn(el); });
+app.addEventListener('keydown',function(e){ if(e.key==='Enter'&&e.target&&e.target.id==='dict'){ e.preventDefault(); runDictado(); } });
+app.addEventListener('toggle',function(e){ if(e.target&&e.target.id==='more') UI.more=e.target.open; },true);
+window.addEventListener('pagehide',function(){ saveLocal(); });
+
+loadLocal(); if(ensureBuiltins()){ saveLocal(); dirty.profile=1; } render(); initCloud(); importFromHash();
+if('serviceWorker' in navigator&&location.protocol==='https:'){ window.addEventListener('load',function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); }); }
+})();
+</script>
+</body>
+</html>
+
+</body></html>
