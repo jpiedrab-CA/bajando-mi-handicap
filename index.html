@@ -455,6 +455,10 @@ function parseDictado(raw,par){
   // en green / no en green (sin consumir texto)
   if(/\b(no llegue|falle (el )?green|fuera del? green|afuera del? green|no quedo en (el )?green|no (la )?deje en (el )?green|green fallado|no tome (el )?green)\b/.test(t)) R.ge=false;
   else if(/\b(en (el )?green|tome (el )?green|agarre (el )?green)\b/.test(t)) R.ge=true;
+  if(/\b(me quede cort[oa]|cort[oa] del? green|cort[oa] del green|quedo cort[oa] del? green)\b/.test(t)){ R.gf='corto'; R.ge=false; }
+  else if(/\b(me pase del? green|me pase|pasad[oa] del? green|larg[oa] del? green|me fui largo)\b/.test(t)){ R.gf='largo'; R.ge=false; }
+  else if(/\b(izquierda del? green|green por (la )?izquierda)\b/.test(t)){ R.gf='izq'; R.ge=false; }
+  else if(/\b(derecha del? green|green por (la )?derecha)\b/.test(t)){ R.gf='der'; R.ge=false; }
   // cerca
   take(/\b(\d{1,2}) (?:golpes? )?de cerca\b/,function(m){R.c=+m[1];})
    || take(/\bcerca (?:de )?(?:hice |fueron |son )?(\d{1,2})\b(?! ?metros)/,function(m){R.c=+m[1];})
@@ -500,13 +504,13 @@ function parseDictado(raw,par){
   if(R.gd!=null&&(R.gd<5||R.gd>350)) delete R.gd;
   if(R.pc!=null&&R.pc>10) delete R.pc;
   take(/\b(desconcentrado|desconcentre|distraido|disperso|sin foco|sin concentracion|poco concentrado|no (?:estaba|estuve|estoy) concentrado)\b/,function(){R.foco=false;}) || take(/\b(concentrado|enfocado|con foco|metido en el juego)\b/,function(){R.foco=true;});
-  R.found=['s','sal','gd','ge','c','p','pc','pen','an','foco','rut','hoyo','next'].filter(function(k){return R[k]!=null;}).length;
+  R.found=['s','sal','gd','ge','gf','c','p','pc','pen','an','foco','rut','hoyo','next'].filter(function(k){return R[k]!=null;}).length;
   return R;
 }
 function describe(n,d){
   var a=[]; if(d.s!=null) a.push(d.s+(d.s===1?' golpe':' golpes'));
   if(d.sal!=null) a.push(d.sal?'salida en juego':'salida fuera de juego'+(d.lado==='izq'?' por izquierda':d.lado==='der'?' por derecha':''));
-  if(d.gd!=null) a.push('a green desde '+d.gd+' m'); if(d.ge!=null) a.push(d.ge?'quedó en green':'no quedó en green');
+  if(d.gd!=null) a.push('a green desde '+d.gd+' m'); if(d.ge!=null) a.push(d.ge?'quedó en green':'no quedó en green'+(d.gf&&GF[d.gf]?' ('+GF[d.gf].toLowerCase()+')':''));
   if(d.c!=null) a.push('cerca '+d.c); if(d.p!=null) a.push(d.p+(d.p===1?' putt':' putts')); if(d.pc!=null) a.push(d.pc+(d.pc===1?' putt corto':' putts cortos')+' (menos de 1 m)'); if(d.pen!=null) a.push(d.pen+(d.pen===1?' penal':' penales'));
   if(d.an!=null) a.push(ANIMO[d.an].toLowerCase()); if(d.foco!=null) a.push(d.foco?'concentrado':'desconcentrado'); if(d.rut!=null) a.push(d.rut?'con rutina':'sin rutina');
   return 'Hoyo '+n+': '+(a.length?a.join(', '):'sin cambios');
@@ -515,8 +519,9 @@ function applyDictado(R){
   var r=S.rounds[UI.roundId]; if(!r) return;
   var n=UI.hole; if(R.hoyo!=null&&r.holes.some(function(h){return h.n===R.hoyo;})) n=R.hoyo;
   var bq=bloqueo(r,n); if(bq!=null){ UI.hole=bq; UI.falta=bq; UI.dnote='Primero cargá el total de golpes del hoyo '+bq+'.'; render(); return; }
-  var patch={}; ['s','sal','lado','gd','ge','c','p','pc','pen','an','foco','rut'].forEach(function(k){ if(R[k]!=null) patch[k]=R[k]; });
+  var patch={}; ['s','sal','lado','gd','ge','gf','c','p','pc','pen','an','foco','rut'].forEach(function(k){ if(R[k]!=null) patch[k]=R[k]; });
   if(patch.sal===true) patch.lado=null;
+  if(patch.ge===true) patch.gf=null;
   var hh=r.holes.filter(function(x){return x.n===n;})[0];
   if(hh&&hh.par===3){ if(patch.gd!=null&&patch.gd<60) delete patch.gd; }
   var prev=clone(r.scores[n]||{}), changed=Object.keys(patch).length>0;
@@ -540,12 +545,12 @@ function askClaude(){
   var h=r.holes.filter(function(x){return x.n===UI.hole;})[0]; var text=UI.dict;
   UI.dnote='Interpretando…'; render();
   var prompt='Sos el intérprete de una tarjeta de golf. El jugador dictó en español lo que hizo en un hoyo. Respondé solo con un objeto JSON con estas claves, usando null en lo que no haya dicho: '+
-   '{"hoyo": número de hoyo si lo nombra, "golpes": total de golpes del hoyo, "salida_en_juego": true o false, "salida_lado": "izq" o "der", "green_metros": distancia en metros del golpe al green, "en_green": true o false, "cerca": golpes hechos desde menos de 90 metros contando los putts, "putts": número total de putts, "putts_cortos": cuántos de esos putts fueron desde menos de 1 metro, "penales": número, "animo": "tranquilo", "ansioso" (quería pegar rápido, se apuró) o "enfadado", "concentrado": true si dijo que estaba concentrado o enfocado, false si dijo desconcentrado o distraído, "rutina": true si aplicó la rutina del golpe, false si no}. '+
+   '{"hoyo": número de hoyo si lo nombra, "golpes": total de golpes del hoyo, "salida_en_juego": true o false, "salida_lado": "izq" o "der", "green_metros": distancia en metros del golpe al green, "en_green": true o false, "green_fallo": si no quedó en green, "corto", "largo" (se pasó), "izq" o "der", "cerca": golpes hechos desde menos de 90 metros contando los putts, "putts": número total de putts, "putts_cortos": cuántos de esos putts fueron desde menos de 1 metro, "penales": número, "animo": "tranquilo", "ansioso" (quería pegar rápido, se apuró) o "enfadado", "concentrado": true si dijo que estaba concentrado o enfocado, false si dijo desconcentrado o distraído, "rutina": true si aplicó la rutina del golpe, false si no}. '+
    'Si dice par, bogey, birdie, etc., calculá los golpes con el par del hoyo. Hoyo actual: '+h.n+'. Par del hoyo: '+h.par+'. Dictado: """'+text+'"""';
   sampleFn.json(prompt,{modelTier:'quick'}).then(function(j){
     var R={}; function num(v,lo,hi){ return (typeof v==='number'&&v>=lo&&v<=hi)?Math.round(v):null; }
     if(j&&typeof j==='object'){ R.hoyo=num(j.hoyo,1,18); R.s=num(j.golpes,1,20); if(typeof j.salida_en_juego==='boolean') R.sal=j.salida_en_juego;
-      if(j.salida_lado==='izq'||j.salida_lado==='der') R.lado=j.salida_lado; R.gd=num(j.green_metros,5,350); if(typeof j.en_green==='boolean') R.ge=j.en_green;
+      if(j.salida_lado==='izq'||j.salida_lado==='der') R.lado=j.salida_lado; R.gd=num(j.green_metros,5,350); if(typeof j.en_green==='boolean') R.ge=j.en_green; if(GF[j.green_fallo]&&R.ge!==true){ R.gf=j.green_fallo; R.ge=false; }
       R.c=num(j.cerca,0,15); R.p=num(j.putts,0,10); R.pc=num(j.putts_cortos,0,10); R.pen=num(j.penales,0,9);
       R.an=j.animo==='tranquilo'?'tranq':j.animo==='ansioso'?'tenso':j.animo==='enfadado'?'enf':null; if(typeof j.concentrado==='boolean') R.foco=j.concentrado; if(typeof j.rutina==='boolean') R.rut=j.rutina; }
     var any=['s','sal','gd','ge','c','p','pc','pen','an','foco','rut'].some(function(k){return R[k]!=null;});
@@ -664,7 +669,8 @@ function vRound(){
   html+=st('a green')+'<h3>A green</h3><p class="hint">'+(h.par===3?'Par 3: la salida es tu golpe al green.':'¿Desde qué distancia pegaste el golpe al green?')+'</p>'+
     '<div class="dist"><button data-a="gdStep" data-v="-5" aria-label="Restar 5 metros">−5</button><input id="gd" type="number" inputmode="numeric" min="1" max="350" data-c="gd" value="'+(d.gd==null?'':d.gd)+'" placeholder="–" aria-label="Distancia al green en metros"><span class="u">m</span><button data-a="gdStep" data-v="5" aria-label="Sumar 5 metros">+5</button></div>'+
     '<div class="chips scroll" id="gdchips">'+quick.map(function(v){return chip(v+(h.par===3?' m, la medida del hoyo':''),d.gd===v,'data-a="gd" data-v="'+v+'"');}).join('')+'</div>'+
-    '<div class="chips">'+chip('Quedó en green',d.ge===true,'data-a="ge" data-v="1"')+chip('No quedó',d.ge===false,'data-a="ge" data-v="0"','bad')+'</div></section>';
+    '<div class="chips">'+chip('Quedó en green',d.ge===true,'data-a="ge" data-v="1"')+chip('No quedó',d.ge===false,'data-a="ge" data-v="0"','bad')+'</div>'+
+    (d.ge===false?'<p class="hint" style="margin-top:12px">¿Dónde quedó?</p><div class="chips four">'+GF_ORD.map(function(k){return chip(GF[k],d.gf===k,'data-a="gf" data-v="'+k+'"');}).join('')+'</div>':'')+'</section>';
   // cerca
   var warn=(d.c!=null&&d.s!=null&&d.c>d.s)?'<p class="scoreline" style="color:var(--red)">Cerca no puede superar el total de golpes.</p>':(d.c!=null&&d.s!=null?'<p class="scoreline">'+(d.s-d.c)+' largos y '+d.c+' de cerca</p>':'');
   html+=st('cerca')+'<div class="row"><div><h3>Cerca</h3><p class="hint">Golpes desde menos de 90 m, contando los putts</p></div>'+stepper(d.c,'data-f="c"',false,'golpes de cerca')+'</div>'+warn+'</section>';
@@ -791,7 +797,7 @@ var BANDS=[[0,90,'Menos de 90'],[90,120,'90 a 119'],[120,150,'120 a 149'],[150,1
 function aggregate(rounds){
   var A={holes:0,rel:0,netRel:0,netN:0,types:{b:0,p:0,bo:0,d:0,t:0},byPar:{3:{n:0,rel:0},4:{n:0,rel:0},5:{n:0,rel:0}},
     sal:{n:0,ok:0,izq:0,der:0,pen:0,okRel:0,okN:0,noRel:0,noN:0},s3:{n:0,ok:0,izq:0,der:0,pen:0},gd:{n:0,sum:0},bands:BANDS.map(function(b){return {label:b[2],n:0,geN:0,geOk:0,rel:0,relN:0};}),
-    c:{n:0,sum:0,strokes:0,dist:{}},putts:{n:0,sum:0,bothN:0,cortos:0,largos:0},ap:{n:0,sum:0,putts:0,dist:{}},drv:{n:0,sum:0,max:0},pen:0,byHole:{},series:[]};
+    c:{n:0,sum:0,strokes:0,dist:{}},putts:{n:0,sum:0,bothN:0,cortos:0,largos:0},ap:{n:0,sum:0,putts:0,dist:{}},gf:{n:0,miss:0,corto:0,largo:0,izq:0,der:0},drv:{n:0,sum:0,max:0},pen:0,byHole:{},series:[]};
   var count={}; rounds.forEach(function(r){count[r.courseId]=(count[r.courseId]||0)+1;});
   var main=Object.keys(count).sort(function(a,b){return count[b]-count[a];})[0]; A.mainCourse=main;
   rounds.forEach(function(r){
@@ -807,6 +813,7 @@ function aggregate(rounds){
       if(h.par===3&&d.sal!=null){ A.s3.n++; if(d.sal)A.s3.ok++; else if(d.lado==='izq')A.s3.izq++; else if(d.lado==='der')A.s3.der++; else if(d.lado==='pen')A.s3.pen++; }
       if(h.par>3&&d.sal!=null){ A.sal.n++; if(d.sal)A.sal.ok++; else if(d.lado==='izq')A.sal.izq++; else if(d.lado==='der')A.sal.der++; else if(d.lado==='pen')A.sal.pen++; }
       if(d.gd!=null){ A.gd.n++; A.gd.sum+=d.gd; for(var i=0;i<BANDS.length;i++){ if(d.gd>=BANDS[i][0]&&d.gd<BANDS[i][1]){ var b=A.bands[i]; b.n++; if(d.ge!=null){b.geN++; if(d.ge)b.geOk++;} if(d.s!=null){b.rel+=d.s-h.par;b.relN++;} break; } } }
+      if(d.ge===false){ A.gf.miss++; if(d.gf&&GF[d.gf]){ A.gf.n++; A.gf[d.gf]++; } }
       if(d.c!=null){ A.c.n++; A.c.sum+=d.c; var k=d.c>=5?'5+':String(d.c); A.c.dist[k]=(A.c.dist[k]||0)+1; }
       if(d.p!=null){A.putts.n++;A.putts.sum+=d.p;}
       if(h.par>3&&d.pts&&d.pts.length>=2){ var dv=hav(d.pts[0],d.pts[1]); if(dv>=20&&dv<=400){ A.drv.n++; A.drv.sum+=dv; if(dv>A.drv.max) A.drv.max=dv; } }
@@ -882,6 +889,28 @@ function cabezaBlock(rs){
     ANIMO_ORD.filter(function(k){return an[k];}).map(function(k){return '<tr><td>'+ANIMO[k]+'</td><td>'+an[k].n+' ('+pct(an[k].n,nAn)+')</td><td>'+relF(an[k].rel/an[k].n)+'</td></tr>';}).join('')+'</tbody></table>'; }
   return html+'</section>';
 }
+function gfBlock(G){
+  if(!G.n) return '';
+  var mx=Math.max(G.corto,G.largo,G.izq,G.der), pc=G.corto/G.n, top=GF_ORD.slice().sort(function(a,b){return G[b]-G[a];})[0], msg;
+  if(G.n<5) msg='Todavía son pocos greens fallados con el dato. Seguí marcándolo y en unas vueltas vas a ver tu patrón.';
+  else if(pc>=0.4) msg='<b>Tu fallo más común es quedarte corto</b> ('+pct(G.corto,G.n)+'). Elegí el palo por tu golpe normal, no por el mejor, y si dudás entre dos, <b>un palo más</b>. Pensá en lo que vuela la bola, no en lo que rueda.';
+  else if(G.largo/G.n>=0.3) msg='Te pasás seguido ('+pct(G.largo,G.n)+'), algo poco común: revisá si estás tomando palo de más o si el green recibe duro.';
+  else if(top==='izq'||top==='der') msg='Tu fallo más común es por '+GF[top].toLowerCase()+' ('+pct(G[top],G.n)+'). Apuntá al centro del green y dejá el margen del lado contrario.';
+  else msg='Tus fallos están repartidos. Seguí apuntando al centro del green.';
+  return '<section class="block"><h3>Cuando fallás el green</h3><p class="small muted" style="margin-bottom:10px">Dónde quedó la bola en los '+G.n+(G.n===1?' green fallado':' greens fallados')+' donde lo marcaste'+(G.miss>G.n?', de '+G.miss+' fallados en total':'')+'.</p>'+
+    '<div class="bars">'+GF_ORD.map(function(k){ return '<div class="barrow"><span>'+GF[k]+'</span><span class="r">'+G[k]+' ('+pct(G[k],G.n)+')</span><div class="track"><div class="fill" style="width:'+(mx?Math.round(100*G[k]/mx):0)+'%"></div></div></div>'; }).join('')+'</div>'+
+    '<p style="margin-top:10px">'+msg+'</p><p class="small muted" style="margin-top:8px">Referencia del video de LaMulligang: los handicap de 16 a 20 se quedan cortos el 41% de las veces que fallan el green, y solo 1 de cada 20 golpes al green se pasa.</p></section>';
+}
+function doblesBlock(rs){
+  var C=orgCount(rs); if(!C.bad) return '';
+  var html='<section class="block"><h3>De dónde salen tus dobles</h3><p class="small muted" style="margin-bottom:10px">'+C.bad+(C.bad===1?' doble bogey o peor':' dobles bogeys o peor')+' en '+(rs.length===1?'esta vuelta':'estas '+rs.length+' vueltas')+'. '+(C.n?'Clasificaste '+C.n+' en la reflexión.':'')+'</p>';
+  if(!C.n) return html+'<div class="note" style="margin:0">Todavía no marcaste el origen de ninguno. Abrí una vuelta, entrá a Reflexión y tocá de dónde salió cada doble: acá vas a ver cuál es tu fábrica de dobles.</div></section>';
+  var ks=Object.keys(C.by).sort(function(a,b){return C.by[b]-C.by[a];}), mx=C.by[ks[0]];
+  html+='<div class="bars">'+ks.map(function(k){ return '<div class="barrow"><span>'+ORG[k]+'</span><span class="r">'+C.by[k]+' ('+pct(C.by[k],C.n)+')</span><div class="track"><div class="fill" style="width:'+Math.round(100*C.by[k]/mx)+'%"></div></div></div>'; }).join('')+'</div>';
+  html+='<div class="note" style="margin:12px 0 0"><b>Tu fábrica de dobles: '+ORG[ks[0]].toLowerCase()+'.</b> Para la próxima vuelta, '+ORG_TIP[ks[0]]+'</div>';
+  if(C.bad>C.n) html+='<p class="small muted" style="margin-top:8px">Te quedan '+(C.bad-C.n)+' sin clasificar.</p>';
+  return html+'<p class="small muted" style="margin-top:8px">Idea del video de LaMulligang: un doble casi nunca es un golpe malo solo, es un golpe malo seguido de una mala decisión.</p></section>';
+}
 function vStats(){
   var all=sortedRounds().filter(function(r){return totals(r).n>0;});
   var html='<header class="top"><h1>Estadísticas</h1></header>';
@@ -908,6 +937,7 @@ function vStats(){
   if(A.gd.n){ var mxn=Math.max.apply(null,A.bands.map(function(b){return b.n;}));
     html+='<section class="block"><h3>A green</h3><p class="small muted" style="margin-bottom:10px">Cuántos golpes al green pegaste desde cada distancia, y cuántos quedaron.</p><div class="bars">'+A.bands.map(function(b){ return '<div class="barrow"><span>'+b.label+' m</span><span class="r">'+b.n+(b.n===1?' golpe':' golpes')+(b.geN?', '+pct(b.geOk,b.geN)+' en green':'')+'</span><div class="track"><div class="fill" style="width:'+(mxn?Math.round(100*b.n/mxn):0)+'%"></div></div></div>'; }).join('')+'</div>'+
     (A.bands.some(function(b){return b.relN;})?'<table class="tbl" style="margin-top:12px"><thead><tr><th>Distancia</th><th>Hoyos</th><th>Score contra el par</th></tr></thead><tbody>'+A.bands.filter(function(b){return b.relN;}).map(function(b){return '<tr><td>'+b.label+' m</td><td>'+b.relN+'</td><td>'+relF(b.rel/b.relN)+'</td></tr>';}).join('')+'</tbody></table>':'')+'</section>'; }
+  html+=gfBlock(A.gf);
   // cerca
   if(A.c.n){ var largos=A.c.strokes-A.c.sum, tot=A.c.strokes;
     html+='<section class="block"><h3>Cerca</h3><p style="margin-bottom:4px">'+f1(A.c.sum/A.c.n)+' golpes de cerca por hoyo, unos '+Math.round(18*A.c.sum/A.c.n)+' por vuelta.</p>'+
@@ -920,6 +950,7 @@ function vStats(){
   // resultados
   html+='<section class="block"><h3>Resultados por hoyo</h3><div class="kpis four" style="margin-bottom:10px">'+[['Birdies o mejor',A.types.b],['Pares',A.types.p],['Bogeys',A.types.bo],['Dobles o más',A.types.d+A.types.t]].map(function(x){return '<div class="kpi"><div class="v">'+x[1]+'</div><div class="k">'+x[0]+'</div></div>';}).join('')+'</div>'+
     '<table class="tbl"><thead><tr><th>Tipo de hoyo</th><th>Jugados</th><th>Media contra el par</th></tr></thead><tbody>'+[3,4,5].filter(function(p){return A.byPar[p].n;}).map(function(p){return '<tr><td>Par '+p+'</td><td>'+A.byPar[p].n+'</td><td>'+relF(A.byPar[p].rel/A.byPar[p].n)+'</td></tr>';}).join('')+'</tbody></table></section>';
+  html+=doblesBlock(rs);
   // hoyo por hoyo
   var hk=Object.keys(A.byHole).map(Number).sort(function(a,b){return a-b;});
   if(hk.length){ var c=courseById(A.mainCourse), worst=hk.slice().sort(function(a,b){return A.byHole[b].net/A.byHole[b].n-A.byHole[a].net/A.byHole[a].n;}).slice(0,3);
@@ -997,6 +1028,17 @@ function saveProfile(){ S.profile.updatedAt=Date.now(); markDirty('profile'); }
 var SENS=['Suelto','Concentrado','Disfrutando','Tenso','Apurado','Frustrado','Cansado','Distraído'];
 var CAUSES=['Viento','Calor','Frío o lluvia','Greens rápidos o lentos','Cansancio físico','Apuro o poco tiempo','Ritmo de juego o compañeros','La cabeza en otra cosa','Ninguna'];
 var ERR={decision:'Elegí mal el golpe',apunte:'Apunté mal',ejecucion:'Ejecuté mal',cabeza:'Me ganó la cabeza'};
+var GF={corto:'Corto',largo:'Pasado',izq:'Izquierda',der:'Derecha'}, GF_ORD=['corto','largo','izq','der'];
+var ORG={penal:'Penal o fuera de límites',recup:'Recuperación desde los árboles',corto:'Corto del green',bunker:'Dos golpes en el búnker',putts:'Tres putts',heroe:'Golpe de héroe'};
+var ORG_TIP={
+  penal:'en el tee preguntate dónde no puede ir la bola, apuntá al otro lado y salí con el palo que más veces dejás en juego. Si dudás de si salió, jugá provisional.',
+  recup:'desde los árboles, sacala a la calle en un golpe por el camino más ancho, aunque sea de costado o un poco hacia atrás.',
+  corto:'elegí el palo por tu golpe normal, no por el mejor, y si dudás entre dos palos llevá el más largo.',
+  bunker:'en la arena olvidate de la bandera: el único objetivo es sacarla a la primera y dejarla en el green, apuntando al centro.',
+  putts:'desde lejos el objetivo es dejarla cerca, no meterla; la velocidad importa más que la línea. Tirá unos putts largos antes de salir.',
+  heroe:'antes del golpe difícil preguntate cuántas veces de 10 te sale. Si no es casi siempre, no es tu golpe.'};
+function orgHint(d){ if(!d) return null; if(d.pen>0||d.lado==='pen') return 'penal'; if(d.p>=3) return 'putts'; if(d.ge===false&&d.gf==='corto') return 'corto'; return null; }
+function orgCount(rounds){ var C={bad:0,n:0,by:{}}; rounds.forEach(function(r){ var hs=refl(r).holes||{}; badHoles(r).forEach(function(h){ C.bad++; var o=(hs[h.n]||{}).org; if(o&&ORG[o]){ C.n++; C.by[o]=(C.by[o]||0)+1; } }); }); return C; }
 var LVL5=['Muy baja','Baja','Normal','Alta','Muy alta'];
 function refl(r){ return r.refl||{}; }
 function reflDone(r){ var f=r.refl; return !!(f&&f.conf&&f.ans); }
@@ -1013,9 +1055,11 @@ function vReflect(){
   html+='<section class="block"><h3>¿Cuánta confianza tuviste en tus golpes?</h3>'+scale('conf',f.conf,'Confianza')+'</section>';
   html+='<section class="block"><h3>¿Cuántos nervios o ansiedad sentiste?</h3>'+scale('ans',f.ans,'Ansiedad')+'</section>';
   html+='<section class="block"><h3>¿Algo de afuera te influyó?</h3><div class="chips">'+CAUSES.map(function(x){return chip(x,(f.causes||[]).indexOf(x)>=0,'data-a="rfm" data-k="causes" data-v="'+esc(x)+'"');}).join('')+'</div></section>';
-  if(bad.length){ html+='<section class="block"><h3>Los hoyos que se complicaron</h3><p class="small muted" style="margin-bottom:10px">Como dice Mikel: antes de cambiar el swing, separá si elegiste mal, apuntaste mal o ejecutaste mal.</p>'+
+  if(bad.length){ html+='<section class="block"><h3>Los hoyos que se complicaron</h3><p class="small muted" style="margin-bottom:10px">Marcá de dónde salió cada doble: casi siempre es un golpe malo seguido de una mala decisión (LaMulligang). Y como dice Mikel: antes de cambiar el swing, separá si elegiste mal, apuntaste mal o ejecutaste mal.</p>'+
     bad.map(function(h){ var d=r.scores[h.n], hr=(f.holes||{})[h.n]||{};
-      return '<div style="padding:10px 0;border-top:1px solid var(--line)"><p style="margin-bottom:6px"><b>Hoyo '+h.n+'</b>, par '+h.par+': '+mk(d.s,h.par)+' '+scoreName(d.s-h.par)+'</p><div class="chips">'+Object.keys(ERR).map(function(k){return chip(ERR[k],hr.err===k,'data-a="rfh" data-n="'+h.n+'" data-v="'+k+'"');}).join('')+'</div>'+
+      return '<div style="padding:10px 0;border-top:1px solid var(--line)"><p style="margin-bottom:6px"><b>Hoyo '+h.n+'</b>, par '+h.par+': '+mk(d.s,h.par)+' '+scoreName(d.s-h.par)+'</p>'+
+        '<p class="small muted" style="margin:0 0 4px">¿De dónde salió?'+((!hr.org&&orgHint(d))?' Por tu tarjeta parece: '+ORG[orgHint(d)].toLowerCase()+'.':'')+'</p><div class="chips">'+Object.keys(ORG).map(function(k){return chip(ORG[k],hr.org===k,'data-a="rfh2" data-k="org" data-n="'+h.n+'" data-v="'+k+'"');}).join('')+'</div>'+
+        '<p class="small muted" style="margin:8px 0 4px">¿Qué falló?</p><div class="chips">'+Object.keys(ERR).map(function(k){return chip(ERR[k],hr.err===k,'data-a="rfh" data-n="'+h.n+'" data-v="'+k+'"');}).join('')+'</div>'+
         '<p class="small muted" style="margin:8px 0 4px">¿Cómo llegaste al tee?</p><div class="chips">'+['Tranquilo','Tenso','Enfadado'].map(function(x){return chip(x,hr.tee===x,'data-a="rfh2" data-k="tee" data-n="'+h.n+'" data-v="'+x+'"');}).join('')+'</div>'+
         '<p class="small muted" style="margin:8px 0 4px">¿Hiciste tu rutina en todos los golpes?</p><div class="chips">'+chip('Sí',hr.rut==='si','data-a="rfh2" data-k="rut" data-n="'+h.n+'" data-v="si"')+chip('No',hr.rut==='no','data-a="rfh2" data-k="rut" data-n="'+h.n+'" data-v="no"','bad')+'</div>'+
         '<input type="text" data-c="rfhNote" data-n="'+h.n+'" value="'+esc(hr.note||'')+'" placeholder="¿Por qué pasó realmente? En pocas palabras" style="margin-top:8px" aria-label="Nota del hoyo '+h.n+'"></div>'; }).join('')+
@@ -1035,6 +1079,8 @@ function reflTips(r){
   if(errs.cabeza||(f.ans>=4)) tips.push({id:'nervios',txt:'Los nervios pesaron. No te digas "calmate": ocupá la cabeza con tres preguntas antes de pegar: ¿dónde quiero que caiga?, ¿a qué apunto exactamente?, ¿cómo estoy respirando? Soltá el aire despacio y llegá a la bola con una sola palabra, como "suave".'});
   if(angry) tips.push({id:'tee',txt:'En '+angry+(angry===1?' hoyo complicado llegaste':' hoyos complicados llegaste')+' al tee tenso o enfadado. Los peores hoyos suelen empezar ahí: cerrá cada hoyo en el green con un gesto y una respiración, y arrancá el siguiente de cero.'});
   if(noRut) tips.push({id:'rutina',txt:'En '+noRut+(noRut===1?' hoyo':' hoyos')+' no hiciste tu rutina. Practicala en la cancha: las últimas 5 bolas del calentamiento, con el palo del hoyo 1, como si te estuvieran mirando.'});
+  var orgs={}; badHoles(r).forEach(function(h){ var o=(hs[h.n]||{}).org; if(o&&ORG[o]) orgs[o]=(orgs[o]||0)+1; });
+  Object.keys(orgs).sort(function(a,b){return orgs[b]-orgs[a];}).forEach(function(k){ tips.push({id:'org_'+k,txt:orgs[k]+(orgs[k]===1?' doble salió':' dobles salieron')+' de: '+ORG[k].toLowerCase()+'. Para la próxima, '+ORG_TIP[k]}); });
   if(f.after==='heroico') tips.push({id:'tren',txt:'Después de un mal hoyo fuiste a recuperarlo todo de una: así empieza el "tren de bogeys". La mejor salida suele ser el golpe aburrido, aceptando el bogey.'});
   if(f.conf&&f.conf<=2) tips.push({id:'conf',txt:'Con poca confianza, elegí el golpe que sabés jugar aunque no sea el más lindo: un chip rodado antes que un flop, un híbrido antes que el driver.'});
   if((f.sens||[]).indexOf('Apurado')>=0||(f.causes||[]).indexOf('Apuro o poco tiempo')>=0) tips.push({id:'apuro',txt:'Jugaste apurado: llegá con tiempo para calentar y hacé la rutina aunque el grupo de atrás espere.'});
@@ -1068,7 +1114,7 @@ function reflFeedback(r){
 }
 function askReflect(){
   var r=curRound(); if(!r||!sampleFn||UI.rfBusy) return; var f=refl(r), t=totals(r);
-  var holes=r.holes.map(function(h){var d=r.scores[h.n]||{}, hr=(f.holes||{})[h.n]||{}; return 'H'+h.n+' par '+h.par+': '+(d.s==null?'-':d.s)+' golpes'+(d.sal!=null?', salida '+(d.sal?'en juego':'fuera '+(d.lado||'')):'')+(d.gd!=null?', a green desde '+d.gd+' m':'')+(d.c!=null?', cerca '+d.c:'')+(d.p!=null?', putts '+d.p:'')+(d.an?', '+ANIMO[d.an].toLowerCase():'')+(d.foco!=null?', '+(d.foco?'concentrado':'desconcentrado'):'')+(hr.err?', error: '+ERR[hr.err]:'')+(hr.tee?', llegó al tee '+hr.tee.toLowerCase():'')+(hr.rut?', rutina: '+hr.rut:'')+(hr.note?' ('+hr.note+')':'');}).join('\n');
+  var holes=r.holes.map(function(h){var d=r.scores[h.n]||{}, hr=(f.holes||{})[h.n]||{}; return 'H'+h.n+' par '+h.par+': '+(d.s==null?'-':d.s)+' golpes'+(d.sal!=null?', salida '+(d.sal?'en juego':'fuera '+(d.lado||'')):'')+(d.gd!=null?', a green desde '+d.gd+' m':'')+(d.ge===false?', falló el green'+(d.gf&&GF[d.gf]?' ('+GF[d.gf].toLowerCase()+')':''):'')+(d.c!=null?', cerca '+d.c:'')+(d.p!=null?', putts '+d.p:'')+(hr.org&&ORG[hr.org]?', el doble salió de: '+ORG[hr.org].toLowerCase():'')+(d.an?', '+ANIMO[d.an].toLowerCase():'')+(d.foco!=null?', '+(d.foco?'concentrado':'desconcentrado'):'')+(hr.err?', error: '+ERR[hr.err]:'')+(hr.tee?', llegó al tee '+hr.tee.toLowerCase():'')+(hr.rut?', rutina: '+hr.rut:'')+(hr.note?' ('+hr.note+')':'');}).join('\n');
   var prompt='Sos un entrenador de golf amable y directo, que sigue el enfoque de Mikel Bustamante (Easy Golf): medir salida en juego, distancia al green y golpes desde menos de 90 m; rodar si podés, volar si tenés que hacerlo, parar solo si no queda otra; apuntar al centro del green; separar si el error fue de decisión, de apunte o de ejecución antes de tocar el swing; rutina mental de 3 pasos; para los nervios, las tres preguntas (dónde quiero que caiga, a qué apunto, cómo respiro); una vuelta normal es handicap más 3; cerrar cada hoyo en el green y evitar el tren de bogeys con el golpe aburrido. '+
    'El jugador tiene handicap '+hf(curHcp())+' y quiere llegar a 25. Vuelta '+TIPOS[tipoOf(r)].toLowerCase()+' en '+r.courseName+': '+t.g+' golpes en '+t.n+' hoyos ('+rel(t.rel)+').\n'+holes+
    '\nSensaciones: '+((f.sens||[]).join(', ')||'-')+'. Confianza '+f.conf+'/5. Ansiedad '+f.ans+'/5. Causas externas: '+((f.causes||[]).join(', ')||'-')+'. Mejor sensación: '+(f.best||'-')+'. Qué haría distinto: '+(f.next||'-')+'. Después de un mal hoyo buscó: '+(f.after==='heroico'?'recuperar todo de una':f.after==='seguro'?'el golpe seguro':'-')+'.\n'+
@@ -1207,9 +1253,9 @@ function vCourse(){
 }
 function courseTotals(c){ var p=0,a=0,b=0; c.holes.forEach(function(h){p+=h.par||0;a+=h.ydH||0;b+=h.ydD||0;}); return 'Par '+p+', '+a.toLocaleString('es-AR')+' yardas caballeros, '+b.toLocaleString('es-AR')+' yardas damas.'; }
 function csv(){
-  var rows=[['fecha','tipo','cancha','hoyo','par','handicap_hoyo','yardas','golpes','golpes_recibidos','salida_en_juego','salida_lado','green_metros','en_green','cerca','putts','putts_cortos_menos_1m','penales','salida_metros_gps','animo','concentrado','rutina']];
-  sortedRounds().reverse().forEach(function(r){ var rc=recvMap(r.holes,r.hcp); r.holes.forEach(function(h){ var d=r.scores[h.n]; if(!d) return;
-    rows.push([r.date,TIPOS[tipoOf(r)],r.courseName,h.n,h.par,h.si,h.yd||'',d.s==null?'':d.s,rc[h.n]||0,d.sal==null?'':(d.sal?'si':'no'),d.lado||'',d.gd==null?'':d.gd,d.ge==null?'':(d.ge?'si':'no'),d.c==null?'':d.c,d.p==null?'':d.p,d.pc==null?'':d.pc,d.pen==null?'':d.pen,(h.par>3&&d.pts&&d.pts.length>=2)?hav(d.pts[0],d.pts[1]):'',d.an?ANIMO[d.an].toLowerCase():'',d.foco==null?'':(d.foco?'si':'no'),d.rut==null?'':(d.rut?'si':'no')]); }); });
+  var rows=[['fecha','tipo','cancha','hoyo','par','handicap_hoyo','yardas','golpes','golpes_recibidos','salida_en_juego','salida_lado','green_metros','en_green','cerca','putts','putts_cortos_menos_1m','penales','salida_metros_gps','animo','concentrado','rutina','green_fallo','origen_doble']];
+  sortedRounds().reverse().forEach(function(r){ var rc=recvMap(r.holes,r.hcp), rh=refl(r).holes||{}; r.holes.forEach(function(h){ var d=r.scores[h.n]; if(!d) return;
+    rows.push([r.date,TIPOS[tipoOf(r)],r.courseName,h.n,h.par,h.si,h.yd||'',d.s==null?'':d.s,rc[h.n]||0,d.sal==null?'':(d.sal?'si':'no'),d.lado||'',d.gd==null?'':d.gd,d.ge==null?'':(d.ge?'si':'no'),d.c==null?'':d.c,d.p==null?'':d.p,d.pc==null?'':d.pc,d.pen==null?'':d.pen,(h.par>3&&d.pts&&d.pts.length>=2)?hav(d.pts[0],d.pts[1]):'',d.an?ANIMO[d.an].toLowerCase():'',d.foco==null?'':(d.foco?'si':'no'),d.rut==null?'':(d.rut?'si':'no'),(d.ge===false&&d.gf&&GF[d.gf])?GF[d.gf].toLowerCase():'',((rh[h.n]||{}).org&&ORG[rh[h.n].org])?ORG[rh[h.n].org].toLowerCase():'']); }); });
   var text='\ufeff'+rows.map(function(r){return r.map(function(v){v=String(v);return /[",;\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}).join(';');}).join('\r\n');
   saveFile('mis-vueltas-de-golf.csv',text,'text/csv;charset=utf-8'); toast('CSV descargado');
 }
@@ -1350,7 +1396,8 @@ var ACT={
   an:function(el){ keepDict(); var r=curRound(), d=r.scores[UI.hole]||{}, v=el.dataset.v; setHole(r,UI.hole,{an:d.an===v?null:v}); },
   foco:function(el){ keepDict(); var r=curRound(), d=r.scores[UI.hole]||{}, v=el.dataset.v==='1'; setHole(r,UI.hole,{foco:d.foco===v?null:v}); },
   rut:function(el){ keepDict(); var r=curRound(), d=r.scores[UI.hole]||{}, v=el.dataset.v==='1'; setHole(r,UI.hole,{rut:d.rut===v?null:v}); },
-  ge:function(el){ keepDict(); var r=curRound(), d=r.scores[UI.hole]||{}, v=el.dataset.v==='1'; setHole(r,UI.hole,{ge:d.ge===v?null:v}); },
+  ge:function(el){ keepDict(); var r=curRound(), d=r.scores[UI.hole]||{}, v=el.dataset.v==='1'; var ng=d.ge===v?null:v; setHole(r,UI.hole,{ge:ng,gf:ng===false?(d.gf||null):null}); },
+  gf:function(el){ keepDict(); var r=curRound(), d=r.scores[UI.hole]||{}, v=el.dataset.v; setHole(r,UI.hole,{ge:false,gf:d.gf===v?null:v}); },
   gd:function(el){ keepDict(); var r=curRound(), d=r.scores[UI.hole]||{}, v=+el.dataset.v; setHole(r,UI.hole,{gd:d.gd===v?null:v}); },
   gdStep:function(el){ keepDict(); var r=curRound(), d=r.scores[UI.hole]||{}, h=r.holes.filter(function(x){return x.n===UI.hole;})[0];
     var base=d.gd!=null?d.gd:(h.par===3&&h.yd?ydToM(h.yd):120); var v=d.gd==null?base:Math.max(1,Math.min(350,base+(+el.dataset.v))); setHole(r,UI.hole,{gd:v}); },
