@@ -459,6 +459,11 @@ function parseDictado(raw,par){
   else if(/\b(me pase del? green|me pase|pasad[oa] del? green|larg[oa] del? green|me fui largo)\b/.test(t)){ R.gf='largo'; R.ge=false; }
   else if(/\b(izquierda del? green|green por (la )?izquierda)\b/.test(t)){ R.gf='izq'; R.ge=false; }
   else if(/\b(derecha del? green|green por (la )?derecha)\b/.test(t)){ R.gf='der'; R.ge=false; }
+  // approach (sin putts)
+  var AP='(?:approach(?:es)?|aproach(?:es)?|aproch(?:es)?|approch(?:es)?|aprouch|aproches?|chips?)';
+  take(new RegExp('\\bsin '+AP+'\\b'),function(){R.ap=0;})
+   || take(new RegExp('\\b(\\d{1,2}) (?:golpes? )?(?:de )?'+AP+'\\b'),function(m){R.ap=+m[1];})
+   || take(new RegExp('\\b'+AP+' (?:de |fueron |son )?(\\d{1,2})\\b(?! ?(?:metros|m\\b|yardas))'),function(m){R.ap=+m[1];});
   // cerca
   take(/\b(\d{1,2}) (?:golpes? )?de cerca\b/,function(m){R.c=+m[1];})
    || take(/\bcerca (?:de )?(?:hice |fueron |son )?(\d{1,2})\b(?! ?metros)/,function(m){R.c=+m[1];})
@@ -504,17 +509,18 @@ function parseDictado(raw,par){
   take(/\b(enfadado|enojado|caliente|furioso|frustrado|calentito)\b/,function(){R.an='enf';}) || take(/\b(ansioso|apurado|acelerado|me apure|pegar rapido|pegue rapido)\b/,function(){R.an='tenso';}) || take(/\b(tranquilo|tranqui|relajado|calmo|sereno)\b/,function(){R.an='tranq';});
   if(R.s!=null&&(R.s<1||R.s>20)) delete R.s;
   if(R.c!=null&&R.c>15) delete R.c;
+  if(R.ap!=null&&R.ap>10) delete R.ap;
   if(R.gd!=null&&(R.gd<5||R.gd>350)) delete R.gd;
   if(R.pc!=null&&R.pc>10) delete R.pc;
   take(/\b(desconcentrado|desconcentre|distraido|disperso|sin foco|sin concentracion|poco concentrado|no (?:estaba|estuve|estoy) concentrado)\b/,function(){R.foco=false;}) || take(/\b(concentrado|enfocado|con foco|metido en el juego)\b/,function(){R.foco=true;});
-  R.found=['s','sal','gd','ge','gf','c','p','pc','pen','an','foco','rut','hoyo','next'].filter(function(k){return R[k]!=null;}).length;
+  R.found=['s','sal','gd','ge','gf','ap','c','p','pc','pen','an','foco','rut','hoyo','next'].filter(function(k){return R[k]!=null;}).length;
   return R;
 }
 function describe(n,d){
   var a=[]; if(d.s!=null) a.push(d.s+(d.s===1?' golpe':' golpes'));
   if(d.sal!=null) a.push(d.sal?'salida en juego':'salida fuera de juego'+(d.lado==='izq'?' por izquierda':d.lado==='der'?' por derecha':''));
   if(d.gd!=null) a.push('a green desde '+d.gd+' m'); if(d.ge!=null) a.push(d.ge?'quedó en green':'no quedó en green'+(d.gf&&GF[d.gf]?' ('+GF[d.gf].toLowerCase()+')':''));
-  if(d.c!=null) a.push('cerca '+d.c); if(d.p!=null) a.push(d.p+(d.p===1?' putt':' putts')); if(d.pc!=null) a.push(d.pc+(d.pc===1?' putt corto':' putts cortos')+' (menos de 1 m)'); if(d.pen!=null) a.push(d.pen+(d.pen===1?' penal':' penales'));
+  if(d.ap!=null) a.push('approach '+d.ap); if(d.c!=null) a.push('cerca '+d.c); if(d.p!=null) a.push(d.p+(d.p===1?' putt':' putts')); if(d.pc!=null) a.push(d.pc+(d.pc===1?' putt corto':' putts cortos')+' (menos de 1 m)'); if(d.pen!=null) a.push(d.pen+(d.pen===1?' penal':' penales'));
   if(d.an!=null) a.push(ANIMO[d.an].toLowerCase()); if(d.foco!=null) a.push(d.foco?'concentrado':'desconcentrado'); if(d.rut!=null) a.push(d.rut?'con rutina':'sin rutina');
   return 'Hoyo '+n+': '+(a.length?a.join(', '):'sin cambios');
 }
@@ -522,7 +528,7 @@ function applyDictado(R){
   var r=S.rounds[UI.roundId]; if(!r) return;
   var n=UI.hole; if(R.hoyo!=null&&r.holes.some(function(h){return h.n===R.hoyo;})) n=R.hoyo;
   var bq=bloqueo(r,n); if(bq!=null){ UI.hole=bq; UI.falta=bq; UI.dnote='Primero cargá el total de golpes del hoyo '+bq+'.'; render(); return; }
-  var patch={}; ['s','sal','lado','gd','ge','gf','c','p','pc','pen','an','foco','rut'].forEach(function(k){ if(R[k]!=null) patch[k]=R[k]; });
+  var patch={}; ['s','sal','lado','gd','ge','gf','ap','c','p','pc','pen','an','foco','rut'].forEach(function(k){ if(R[k]!=null) patch[k]=R[k]; });
   if(patch.sal===true) patch.lado=null;
   if(patch.ge===true) patch.gf=null;
   var hh=r.holes.filter(function(x){return x.n===n;})[0];
@@ -540,7 +546,7 @@ function runDictado(){
   var R=parseDictado(text,h.par);
   if(R.found){ applyDictado(R); return; }
   UI.dict=text;
-  UI.dnote=sampleFn?'No lo entendí. <button class="link" data-a="askClaude">Interpretar con Claude</button>':'No lo entendí. Probá con algo como "5 golpes, salida en juego, al green desde 140, cerca 3".';
+  UI.dnote=sampleFn?'No lo entendí. <button class="link" data-a="askClaude">Interpretar con Claude</button>':'No lo entendí. Probá con algo como "5 golpes, salida en juego, al green desde 140, approach 1, 2 putts".';
   render();
 }
 function askClaude(){
@@ -548,13 +554,13 @@ function askClaude(){
   var h=r.holes.filter(function(x){return x.n===UI.hole;})[0]; var text=UI.dict;
   UI.dnote='Interpretando…'; render();
   var prompt='Sos el intérprete de una tarjeta de golf. El jugador dictó en español lo que hizo en un hoyo. Respondé solo con un objeto JSON con estas claves, usando null en lo que no haya dicho: '+
-   '{"hoyo": número de hoyo si lo nombra, "golpes": total de golpes del hoyo, "salida_en_juego": true o false, "salida_lado": "izq" o "der", "green_metros": distancia en metros del golpe al green, "en_green": true o false, "green_fallo": si no quedó en green, "corto", "largo" (se pasó), "izq" o "der", "cerca": golpes hechos desde menos de 90 metros contando los putts, "putts": número total de putts, "putts_cortos": cuántos de esos putts fueron desde menos de 1 metro, "penales": número, "animo": "tranquilo", "ansioso" (quería pegar rápido, se apuró) o "enfadado", "concentrado": true si dijo que estaba concentrado o enfocado, false si dijo desconcentrado o distraído, "rutina": true si aplicó la rutina del golpe, false si no}. '+
+   '{"hoyo": número de hoyo si lo nombra, "golpes": total de golpes del hoyo, "salida_en_juego": true o false, "salida_lado": "izq" o "der", "green_metros": distancia en metros del golpe al green, "en_green": true o false, "green_fallo": si no quedó en green, "corto", "largo" (se pasó), "izq" o "der", "approach": golpes desde menos de 90 metros hasta llegar al green, sin contar los putts, "cerca": solo si dice un total de golpes de cerca que ya incluye los putts, "putts": número total de putts, "putts_cortos": cuántos de esos putts fueron desde menos de 1 metro, "penales": número, "animo": "tranquilo", "ansioso" (quería pegar rápido, se apuró) o "enfadado", "concentrado": true si dijo que estaba concentrado o enfocado, false si dijo desconcentrado o distraído, "rutina": true si aplicó la rutina del golpe, false si no}. '+
    'Si dice par, bogey, birdie, etc., calculá los golpes con el par del hoyo. Hoyo actual: '+h.n+'. Par del hoyo: '+h.par+'. Dictado: """'+text+'"""';
   sampleFn.json(prompt,{modelTier:'quick'}).then(function(j){
     var R={}; function num(v,lo,hi){ return (typeof v==='number'&&v>=lo&&v<=hi)?Math.round(v):null; }
     if(j&&typeof j==='object'){ R.hoyo=num(j.hoyo,1,18); R.s=num(j.golpes,1,20); if(typeof j.salida_en_juego==='boolean') R.sal=j.salida_en_juego;
       if(j.salida_lado==='izq'||j.salida_lado==='der') R.lado=j.salida_lado; R.gd=num(j.green_metros,5,350); if(typeof j.en_green==='boolean') R.ge=j.en_green; if(GF[j.green_fallo]&&R.ge!==true){ R.gf=j.green_fallo; R.ge=false; }
-      R.c=num(j.cerca,0,15); R.p=num(j.putts,0,10); R.pc=num(j.putts_cortos,0,10); R.pen=num(j.penales,0,9);
+      R.ap=num(j.approach,0,10); R.c=num(j.cerca,0,15); R.p=num(j.putts,0,10); R.pc=num(j.putts_cortos,0,10); R.pen=num(j.penales,0,9);
       R.an=j.animo==='tranquilo'?'tranq':j.animo==='ansioso'?'tenso':j.animo==='enfadado'?'enf':null; if(typeof j.concentrado==='boolean') R.foco=j.concentrado; if(typeof j.rutina==='boolean') R.rut=j.rutina; }
     var any=['s','sal','gd','ge','c','p','pc','pen','an','foco','rut'].some(function(k){return R[k]!=null;});
     if(any) applyDictado(R); else { UI.dnote='Tampoco pude interpretarlo. Cargalo con los botones.'; render(); }
@@ -577,7 +583,16 @@ function toggleMic(){
 /* ---------- Cambios en la vuelta ---------- */
 function touch(r){ r.updatedAt=Date.now(); markDirty('r_'+r.id); }
 function setHole(r,n,patch,silent){
-  var d=Object.assign({},r.scores[n]||{},patch); Object.keys(d).forEach(function(k){ if(d[k]==null) delete d[k]; });
+  var base=Object.assign({},r.scores[n]||{});
+  if(base.ap==null&&base.c!=null&&base.p!=null&&base.p<=base.c) base.ap=base.c-base.p; // vueltas viejas: approach = cerca menos putts
+  var d=Object.assign({},base,patch); Object.keys(d).forEach(function(k){ if(d[k]==null) delete d[k]; });
+  // Cerca se calcula sola: approach + putts
+  if(patch.c!=null){ if(patch.ap!=null){ if(d.p==null&&d.c>=d.ap) d.p=d.c-d.ap; else if(d.p!=null) d.c=d.ap+d.p; }
+    else if(d.p!=null&&d.p<=d.c) d.ap=d.c-d.p; else delete d.ap; }
+  else if('ap' in patch||'p' in patch){
+    if(d.ap==null&&!('ap' in patch)&&d.c!=null&&d.p!=null&&d.p<=d.c) d.ap=d.c-d.p;
+    if(d.ap!=null&&d.p!=null) d.c=d.ap+d.p;
+    else if(('ap' in patch&&patch.ap==null)||('p' in patch&&patch.p==null)) delete d.c; }
   var hp=r.holes.filter(function(x){return x.n===n;})[0];
   if(hp&&hp.par===3&&hp.yd&&d.gd==null&&!('gd' in patch)&&(d.s!=null||d.sal!=null)) d.gd=ydToM(hp.yd);
   if(Object.keys(d).length) r.scores[n]=d; else delete r.scores[n];
@@ -674,14 +689,18 @@ function vRound(){
     '<div class="chips scroll" id="gdchips">'+quick.map(function(v){return chip(v+(h.par===3?' m, la medida del hoyo':''),d.gd===v,'data-a="gd" data-v="'+v+'"');}).join('')+'</div>'+
     '<div class="chips">'+chip('Quedó en green',d.ge===true,'data-a="ge" data-v="1"')+chip('No quedó',d.ge===false,'data-a="ge" data-v="0"','bad')+'</div>'+
     (d.ge===false?'<p class="hint" style="margin-top:12px">¿Dónde quedó?</p><div class="chips four">'+GF_ORD.map(function(k){return chip(GF[k],d.gf===k,'data-a="gf" data-v="'+k+'"');}).join('')+'</div>':'')+'</section>';
-  // cerca
-  var warn=(d.c!=null&&d.s!=null&&d.c>d.s)?'<p class="scoreline" style="color:var(--red)">Cerca no puede superar el total de golpes.</p>':(d.c!=null&&d.s!=null?'<p class="scoreline">'+(d.s-d.c)+' largos y '+d.c+' de cerca</p>':'');
-  html+=st('cerca')+'<div class="row"><div><h3>Cerca</h3><p class="hint">Golpes desde menos de 90 m, contando los putts</p></div>'+stepper(d.c,'data-f="c"',false,'golpes de cerca')+'</div>'+warn+'</section>';
-  // detalle opcional
-  var open=UI.more||d.pc!=null||d.pen!=null;
+  // cerca: se cargan approach y putts, y la app los suma
+  var apV=d.ap!=null?d.ap:((d.c!=null&&d.p!=null&&d.p<=d.c)?d.c-d.p:null);
+  var warn=(d.c!=null&&d.s!=null&&d.c>d.s)?'<p class="scoreline" style="color:var(--red)">Approach más putts no puede superar el total de golpes.</p>':
+    (d.c!=null&&apV!=null?'<p class="scoreline">Cerca: <b>'+d.c+'</b> ('+apV+' de approach + '+d.p+(d.p===1?' putt':' putts')+')'+(d.s!=null?' · '+(d.s-d.c)+(d.s-d.c===1?' largo':' largos'):'')+'</p>':
+    (d.c!=null?'<p class="scoreline">Cerca: <b>'+d.c+'</b> en total. Completá approach y putts para ver el detalle.</p>':
+    ((apV!=null||d.p!=null)?'<p class="scoreline">'+(apV==null?'Falta el approach':'Faltan los putts')+' para sumar Cerca.</p>':'')));
   var pline=(d.pc!=null&&d.p!=null)?(d.pc>d.p?'<p class="scoreline" style="color:var(--red);margin:0 0 6px">Los cortos no pueden superar el total de putts.</p>':'<p class="scoreline" style="margin:0 0 6px">'+d.pc+(d.pc===1?' corto':' cortos')+' y '+(d.p-d.pc)+(d.p-d.pc===1?' largo':' largos')+'</p>'):'';
   var pwarn=(d.p!=null&&d.c!=null&&d.p>d.c)?'<p class="scoreline" style="color:var(--red)">Los putts no pueden superar los golpes de cerca.</p>':'';
-  html+='<section class="stat"><div class="row"><div><h3>Putts</h3><p class="hint">Golpes con el putter en el green</p></div>'+stepper(d.p,'data-f="p"',false,'putts')+'</div>'+pwarn+'</section>';
+  html+=st('cerca')+'<h3>Cerca</h3><p class="hint">Desde menos de 90 m. Cargá approach y putts por separado: la app los suma.</p>'+
+    '<div class="row" style="margin-top:12px"><div><b>Approach</b><p class="hint">Golpes hasta llegar al green, sin putts</p></div>'+stepper(apV,'data-f="ap"',false,'golpes de approach')+'</div>'+
+    '<div class="row" style="margin-top:12px"><div><b>Putts</b><p class="hint">Golpes con el putter en el green</p></div>'+stepper(d.p,'data-f="p"',false,'putts')+'</div>'+warn+pwarn+'</section>';
+  var open=UI.more||d.pc!=null||d.pen!=null;
   html+='<details class="more"'+(open?' open':'')+' id="more"><summary>Putts cortos y penales</summary><div class="stat" style="margin:0"><div class="mini"><span>De esos, cortos<br><span class="small muted">desde menos de 1 m</span></span>'+stepper(d.pc,'data-f="pc"',true,'putts cortos, desde menos de 1 metro')+'</div>'+pline+'<div class="mini"><span>Golpes de penal</span>'+stepper(d.pen,'data-f="pen"',true,'penales')+'</div></div></details>';
   // cierre del hoyo: ánimo y rutina
   html+=st(fl.indexOf('cómo estás')>=0?'cómo estás':fl.indexOf('concentración')>=0?'concentración':'rutina')+'<h3>Cierre del hoyo</h3><p class="hint">¿Cómo estás?</p><div class="chips" style="margin-top:8px">'+
@@ -699,7 +718,7 @@ function vRound(){
   var SR=window.SpeechRecognition||window.webkitSpeechRecognition, last=idx===hs.length-1;
   html+='<div class="dock"><div class="in"><div class="dict">'+((SR&&!UI.micBlocked)?'<button class="mic'+(UI.micOn?' on':'')+'" data-a="mic" aria-label="'+(UI.micOn?'Dejar de escuchar':'Dictar el hoyo')+'"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>':'<span></span>')+
     '<input id="dict" type="text" enterkeyhint="send" autocomplete="off" placeholder="Dictá o escribí el hoyo" value="'+esc(UI.dict)+'" aria-label="Dictá o escribí el hoyo"><button class="btn primary" data-a="dictar">Cargar</button></div>'+
-    (function(){ var fc=faltan(r,h.n), nt=UI.dnote||(!Object.keys(d).length?'Por ejemplo: 5 golpes, salida en juego, green desde 140, cerca 3':(d.s==null&&enCurso(r)&&!last?'Para pasar al hoyo '+hs[idx+1].n+' cargá el total de golpes.':(fc.length?'Falta info: '+lista(fc)+'. Podés completarla después.':'')));
+    (function(){ var fc=faltan(r,h.n), nt=UI.dnote||(!Object.keys(d).length?'Por ejemplo: 5 golpes, salida en juego, green desde 140, approach 1, 2 putts':(d.s==null&&enCurso(r)&&!last?'Para pasar al hoyo '+hs[idx+1].n+' cargá el total de golpes.':(fc.length?'Falta info: '+lista(fc)+'. Podés completarla después.':'')));
       return nt?'<p class="dnote">'+nt+'</p>':''; })()+
     '<div class="nav2"><button class="btn quiet" data-a="prev"'+(idx===0?' disabled':'')+'>Anterior</button><button class="btn '+(last?'flag':(enCurso(r)&&d.s==null?'quiet':'primary'))+'" data-a="'+(last?'card':'next')+'">'+(last?'Ver la tarjeta':'Hoyo '+hs[idx+1].n)+'</button></div></div></div>';
   return html;
@@ -1447,6 +1466,7 @@ function step(el,dir){
   if(f==='o'){ var pid=el.dataset.pid; r.others=r.others||{}; var o=r.others[pid]||(r.others[pid]={}); var cur=o[n];
     var v=cur==null?(dir>0?h.par:h.par-1):cur+dir; if(v<1) delete o[n]; else o[n]=Math.min(20,v); touch(r); render(); return; }
   var d=r.scores[n]||{}, c=d[f], nv;
+  if(f==='ap'&&c==null&&d.c!=null&&d.p!=null&&d.p<=d.c) c=d.c-d.p;
   if(f==='s'){ nv=c==null?(dir>0?h.par:h.par-1):c+dir; if(nv<1) nv=null; else nv=Math.min(20,nv); }
   else if(f==='c'){ nv=c==null?(dir>0?2:0):c+dir; if(nv<0) nv=null; else nv=Math.min(15,nv); }
   else if(f==='pc'){ UI.more=true; nv=c==null?(dir>0?1:0):c+dir; if(nv<0) nv=null; else nv=Math.min(10,nv); }
