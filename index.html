@@ -417,9 +417,9 @@ function myNums(rounds){
 function sortedRounds(){ return Object.keys(S.rounds).map(function(k){return S.rounds[k];}).sort(function(a,b){ return a.date===b.date?(b.createdAt||0)-(a.createdAt||0):(a.date<b.date?1:-1); }); }
 function activeRound(){ return sortedRounds().filter(function(r){return r.status==='en_curso';})[0]; }
 /* Un hoyo está cargado cuando tiene golpes, salida, a green y cerca. En una vuelta en curso no se avanza sin completar los anteriores. */
-var REQ=[['s','golpes'],['sal','salida'],['gd','a green'],['c','cerca'],['an','cómo estás'],['rut','rutina']];
+var REQ=[['s','golpes'],['sal','salida'],['gd','a green'],['c','cerca'],['an','cómo estás'],['foco','concentración'],['rut','rutina']];
 var ANIMO={tranq:'Tranquilo',tenso:'Ansioso',enf:'Enfadado'}, ANIMO_ORD=['tranq','tenso','enf'];
-function faltan(r,n){ var d=r.scores[n]||{}; return REQ.filter(function(q){return d[q[0]]==null;}).map(function(q){return q[1];}); }
+function faltan(r,n){ var d=r.scores[n]||{}; return REQ.filter(function(q){return d[q[0]]==null&&(q[0]!=='foco'||enCurso(r));}).map(function(q){return q[1];}); }
 function lista(a){ return a.length<2?a.join(''):a.slice(0,-1).join(', ')+' y '+a[a.length-1]; }
 function enCurso(r){ return r&&r.status==='en_curso'; }
 function sinGolpes(r,n){ return (r.scores[n]||{}).s==null; }
@@ -499,7 +499,8 @@ function parseDictado(raw,par){
   if(R.c!=null&&R.c>15) delete R.c;
   if(R.gd!=null&&(R.gd<5||R.gd>350)) delete R.gd;
   if(R.pc!=null&&R.pc>10) delete R.pc;
-  R.found=['s','sal','gd','ge','c','p','pc','pen','an','rut','hoyo','next'].filter(function(k){return R[k]!=null;}).length;
+  take(/\b(desconcentrado|desconcentre|distraido|disperso|sin foco|sin concentracion|poco concentrado|no (?:estaba|estuve|estoy) concentrado)\b/,function(){R.foco=false;}) || take(/\b(concentrado|enfocado|con foco|metido en el juego)\b/,function(){R.foco=true;});
+  R.found=['s','sal','gd','ge','c','p','pc','pen','an','foco','rut','hoyo','next'].filter(function(k){return R[k]!=null;}).length;
   return R;
 }
 function describe(n,d){
@@ -507,14 +508,14 @@ function describe(n,d){
   if(d.sal!=null) a.push(d.sal?'salida en juego':'salida fuera de juego'+(d.lado==='izq'?' por izquierda':d.lado==='der'?' por derecha':''));
   if(d.gd!=null) a.push('a green desde '+d.gd+' m'); if(d.ge!=null) a.push(d.ge?'quedó en green':'no quedó en green');
   if(d.c!=null) a.push('cerca '+d.c); if(d.p!=null) a.push(d.p+(d.p===1?' putt':' putts')); if(d.pc!=null) a.push(d.pc+(d.pc===1?' putt corto':' putts cortos')+' (menos de 1 m)'); if(d.pen!=null) a.push(d.pen+(d.pen===1?' penal':' penales'));
-  if(d.an!=null) a.push(ANIMO[d.an].toLowerCase()); if(d.rut!=null) a.push(d.rut?'con rutina':'sin rutina');
+  if(d.an!=null) a.push(ANIMO[d.an].toLowerCase()); if(d.foco!=null) a.push(d.foco?'concentrado':'desconcentrado'); if(d.rut!=null) a.push(d.rut?'con rutina':'sin rutina');
   return 'Hoyo '+n+': '+(a.length?a.join(', '):'sin cambios');
 }
 function applyDictado(R){
   var r=S.rounds[UI.roundId]; if(!r) return;
   var n=UI.hole; if(R.hoyo!=null&&r.holes.some(function(h){return h.n===R.hoyo;})) n=R.hoyo;
   var bq=bloqueo(r,n); if(bq!=null){ UI.hole=bq; UI.falta=bq; UI.dnote='Primero cargá el total de golpes del hoyo '+bq+'.'; render(); return; }
-  var patch={}; ['s','sal','lado','gd','ge','c','p','pc','pen','an','rut'].forEach(function(k){ if(R[k]!=null) patch[k]=R[k]; });
+  var patch={}; ['s','sal','lado','gd','ge','c','p','pc','pen','an','foco','rut'].forEach(function(k){ if(R[k]!=null) patch[k]=R[k]; });
   if(patch.sal===true) patch.lado=null;
   var hh=r.holes.filter(function(x){return x.n===n;})[0];
   if(hh&&hh.par===3){ if(patch.gd!=null&&patch.gd<60) delete patch.gd; }
@@ -539,15 +540,15 @@ function askClaude(){
   var h=r.holes.filter(function(x){return x.n===UI.hole;})[0]; var text=UI.dict;
   UI.dnote='Interpretando…'; render();
   var prompt='Sos el intérprete de una tarjeta de golf. El jugador dictó en español lo que hizo en un hoyo. Respondé solo con un objeto JSON con estas claves, usando null en lo que no haya dicho: '+
-   '{"hoyo": número de hoyo si lo nombra, "golpes": total de golpes del hoyo, "salida_en_juego": true o false, "salida_lado": "izq" o "der", "green_metros": distancia en metros del golpe al green, "en_green": true o false, "cerca": golpes hechos desde menos de 90 metros contando los putts, "putts": número total de putts, "putts_cortos": cuántos de esos putts fueron desde menos de 1 metro, "penales": número, "animo": "tranquilo", "ansioso" (quería pegar rápido, se apuró) o "enfadado", "rutina": true si aplicó la rutina del golpe, false si no}. '+
+   '{"hoyo": número de hoyo si lo nombra, "golpes": total de golpes del hoyo, "salida_en_juego": true o false, "salida_lado": "izq" o "der", "green_metros": distancia en metros del golpe al green, "en_green": true o false, "cerca": golpes hechos desde menos de 90 metros contando los putts, "putts": número total de putts, "putts_cortos": cuántos de esos putts fueron desde menos de 1 metro, "penales": número, "animo": "tranquilo", "ansioso" (quería pegar rápido, se apuró) o "enfadado", "concentrado": true si dijo que estaba concentrado o enfocado, false si dijo desconcentrado o distraído, "rutina": true si aplicó la rutina del golpe, false si no}. '+
    'Si dice par, bogey, birdie, etc., calculá los golpes con el par del hoyo. Hoyo actual: '+h.n+'. Par del hoyo: '+h.par+'. Dictado: """'+text+'"""';
   sampleFn.json(prompt,{modelTier:'quick'}).then(function(j){
     var R={}; function num(v,lo,hi){ return (typeof v==='number'&&v>=lo&&v<=hi)?Math.round(v):null; }
     if(j&&typeof j==='object'){ R.hoyo=num(j.hoyo,1,18); R.s=num(j.golpes,1,20); if(typeof j.salida_en_juego==='boolean') R.sal=j.salida_en_juego;
       if(j.salida_lado==='izq'||j.salida_lado==='der') R.lado=j.salida_lado; R.gd=num(j.green_metros,5,350); if(typeof j.en_green==='boolean') R.ge=j.en_green;
       R.c=num(j.cerca,0,15); R.p=num(j.putts,0,10); R.pc=num(j.putts_cortos,0,10); R.pen=num(j.penales,0,9);
-      R.an=j.animo==='tranquilo'?'tranq':j.animo==='ansioso'?'tenso':j.animo==='enfadado'?'enf':null; if(typeof j.rutina==='boolean') R.rut=j.rutina; }
-    var any=['s','sal','gd','ge','c','p','pc','pen','an','rut'].some(function(k){return R[k]!=null;});
+      R.an=j.animo==='tranquilo'?'tranq':j.animo==='ansioso'?'tenso':j.animo==='enfadado'?'enf':null; if(typeof j.concentrado==='boolean') R.foco=j.concentrado; if(typeof j.rutina==='boolean') R.rut=j.rutina; }
+    var any=['s','sal','gd','ge','c','p','pc','pen','an','foco','rut'].some(function(k){return R[k]!=null;});
     if(any) applyDictado(R); else { UI.dnote='Tampoco pude interpretarlo. Cargalo con los botones.'; render(); }
   }).catch(function(e){ UI.dnote=(e&&e.code==='not_granted')?'Sin permiso para consultar a Claude. Cargalo con los botones.':'No pude interpretarlo ahora. Cargalo con los botones.'; render(); });
 }
@@ -674,8 +675,9 @@ function vRound(){
   html+='<section class="stat"><div class="row"><div><h3>Putts</h3><p class="hint">Golpes con el putter en el green</p></div>'+stepper(d.p,'data-f="p"',false,'putts')+'</div>'+pwarn+'</section>';
   html+='<details class="more"'+(open?' open':'')+' id="more"><summary>Putts cortos y penales</summary><div class="stat" style="margin:0"><div class="mini"><span>De esos, cortos<br><span class="small muted">desde menos de 1 m</span></span>'+stepper(d.pc,'data-f="pc"',true,'putts cortos, desde menos de 1 metro')+'</div>'+pline+'<div class="mini"><span>Golpes de penal</span>'+stepper(d.pen,'data-f="pen"',true,'penales')+'</div></div></details>';
   // cierre del hoyo: ánimo y rutina
-  html+=st(fl.indexOf('cómo estás')>=0?'cómo estás':'rutina')+'<h3>Cierre del hoyo</h3><p class="hint">¿Cómo estás?</p><div class="chips" style="margin-top:8px">'+
+  html+=st(fl.indexOf('cómo estás')>=0?'cómo estás':fl.indexOf('concentración')>=0?'concentración':'rutina')+'<h3>Cierre del hoyo</h3><p class="hint">¿Cómo estás?</p><div class="chips" style="margin-top:8px">'+
     chip('Tranquilo',d.an==='tranq','data-a="an" data-v="tranq"')+chip('Ansioso',d.an==='tenso','data-a="an" data-v="tenso"','pen')+chip('Enfadado',d.an==='enf','data-a="an" data-v="enf"','bad')+'</div><p class="small muted" style="margin-top:6px">Ansioso: querías pegar rápido.</p>'+
+    '<p class="hint" style="margin-top:12px">¿Concentrado o desconcentrado?</p><div class="chips" style="margin-top:8px">'+chip('Concentrado',d.foco===true,'data-a="foco" data-v="1"')+chip('Desconcentrado',d.foco===false,'data-a="foco" data-v="0"','bad')+'</div>'+
     '<p class="hint" style="margin-top:12px">¿Aplicaste la rutina del golpe?</p><div class="chips" style="margin-top:8px">'+chip('Sí, la apliqué',d.rut===true,'data-a="rut" data-v="1"')+chip('No',d.rut===false,'data-a="rut" data-v="0"','bad')+'</div></section>';
   // compañeros
   if((r.players||[]).length){ html+='<section class="stat"><h3>Compañeros</h3>'+r.players.map(function(p){ var v=((r.others||{})[p.id]||{})[h.n]; return '<div class="mini"><span>'+esc(p.name||'Compañero')+'</span>'+stepper(v,'data-f="o" data-pid="'+p.id+'"',true,'golpes de '+esc(p.name||'compañero'))+'</div>'; }).join('')+'</section>'; }
@@ -861,16 +863,21 @@ function vCompare(rounds){
   return html+'</section>';
 }
 function cabezaBlock(rs){
-  var an={}, rt={si:{n:0,rel:0},no:{n:0,rel:0}};
+  var an={}, rt={si:{n:0,rel:0},no:{n:0,rel:0}}, fo={si:{n:0,rel:0},no:{n:0,rel:0}};
   rs.forEach(function(r){ r.holes.forEach(function(h){ var d=r.scores[h.n]; if(!d||d.s==null) return; var v=d.s-h.par;
     if(d.an){ var a=an[d.an]=an[d.an]||{n:0,rel:0}; a.n++; a.rel+=v; }
+    if(d.foco!=null){ var c=fo[d.foco?'si':'no']; c.n++; c.rel+=v; }
     if(d.rut!=null){ var b=rt[d.rut?'si':'no']; b.n++; b.rel+=v; } }); });
-  var nAn=ANIMO_ORD.reduce(function(s,k){return s+(an[k]?an[k].n:0);},0), nRt=rt.si.n+rt.no.n;
-  if(!nAn&&!nRt) return '';
-  var html='<section class="block"><h3>Cabeza y rutina</h3><p class="small muted" style="margin-bottom:10px">Cómo jugás según cómo estás y si aplicás la rutina del golpe.</p>';
+  var nAn=ANIMO_ORD.reduce(function(s,k){return s+(an[k]?an[k].n:0);},0), nRt=rt.si.n+rt.no.n, nFo=fo.si.n+fo.no.n;
+  if(!nAn&&!nRt&&!nFo) return '';
+  var html='<section class="block"><h3>Cabeza y rutina</h3><p class="small muted" style="margin-bottom:10px">Cómo jugás según cómo estás, si estás concentrado y si aplicás la rutina del golpe.</p>';
   if(nRt){ html+='<div class="kpis'+(rt.si.n&&rt.no.n?'':' two')+'" style="margin-bottom:10px"><div class="kpi"><div class="v">'+pct(rt.si.n,nRt)+'</div><div class="k">hoyos con rutina</div></div>'+
     (rt.si.n?'<div class="kpi"><div class="v">'+relF(rt.si.rel/rt.si.n)+'</div><div class="k">por hoyo con rutina</div></div>':'')+
     (rt.no.n?'<div class="kpi"><div class="v">'+relF(rt.no.rel/rt.no.n)+'</div><div class="k">por hoyo sin rutina</div></div>':'')+'</div>'; }
+  if(nFo){ html+='<div class="kpis'+(fo.si.n&&fo.no.n?'':' two')+'" style="margin-bottom:10px"><div class="kpi"><div class="v">'+pct(fo.si.n,nFo)+'</div><div class="k">hoyos concentrado</div></div>'+
+    (fo.si.n?'<div class="kpi"><div class="v">'+relF(fo.si.rel/fo.si.n)+'</div><div class="k">por hoyo concentrado</div></div>':'')+
+    (fo.no.n?'<div class="kpi"><div class="v">'+relF(fo.no.rel/fo.no.n)+'</div><div class="k">por hoyo desconcentrado</div></div>':'')+'</div>';
+    if(fo.si.n>=3&&fo.no.n>=3){ var df=(fo.no.rel/fo.no.n-fo.si.rel/fo.si.n)*18; html+='<p style="margin-bottom:10px">Concentrado jugás <b>'+f1(Math.abs(df))+' golpes '+(df>=0?'mejor':'peor')+'</b> cada 18 hoyos que desconcentrado.</p>'; } }
   if(nAn){ html+='<table class="tbl"><thead><tr><th>Cómo estabas</th><th>Hoyos</th><th>Media contra el par</th></tr></thead><tbody>'+
     ANIMO_ORD.filter(function(k){return an[k];}).map(function(k){return '<tr><td>'+ANIMO[k]+'</td><td>'+an[k].n+' ('+pct(an[k].n,nAn)+')</td><td>'+relF(an[k].rel/an[k].n)+'</td></tr>';}).join('')+'</tbody></table>'; }
   return html+'</section>';
@@ -1061,7 +1068,7 @@ function reflFeedback(r){
 }
 function askReflect(){
   var r=curRound(); if(!r||!sampleFn||UI.rfBusy) return; var f=refl(r), t=totals(r);
-  var holes=r.holes.map(function(h){var d=r.scores[h.n]||{}, hr=(f.holes||{})[h.n]||{}; return 'H'+h.n+' par '+h.par+': '+(d.s==null?'-':d.s)+' golpes'+(d.sal!=null?', salida '+(d.sal?'en juego':'fuera '+(d.lado||'')):'')+(d.gd!=null?', a green desde '+d.gd+' m':'')+(d.c!=null?', cerca '+d.c:'')+(d.p!=null?', putts '+d.p:'')+(hr.err?', error: '+ERR[hr.err]:'')+(hr.tee?', llegó al tee '+hr.tee.toLowerCase():'')+(hr.rut?', rutina: '+hr.rut:'')+(hr.note?' ('+hr.note+')':'');}).join('\n');
+  var holes=r.holes.map(function(h){var d=r.scores[h.n]||{}, hr=(f.holes||{})[h.n]||{}; return 'H'+h.n+' par '+h.par+': '+(d.s==null?'-':d.s)+' golpes'+(d.sal!=null?', salida '+(d.sal?'en juego':'fuera '+(d.lado||'')):'')+(d.gd!=null?', a green desde '+d.gd+' m':'')+(d.c!=null?', cerca '+d.c:'')+(d.p!=null?', putts '+d.p:'')+(d.an?', '+ANIMO[d.an].toLowerCase():'')+(d.foco!=null?', '+(d.foco?'concentrado':'desconcentrado'):'')+(hr.err?', error: '+ERR[hr.err]:'')+(hr.tee?', llegó al tee '+hr.tee.toLowerCase():'')+(hr.rut?', rutina: '+hr.rut:'')+(hr.note?' ('+hr.note+')':'');}).join('\n');
   var prompt='Sos un entrenador de golf amable y directo, que sigue el enfoque de Mikel Bustamante (Easy Golf): medir salida en juego, distancia al green y golpes desde menos de 90 m; rodar si podés, volar si tenés que hacerlo, parar solo si no queda otra; apuntar al centro del green; separar si el error fue de decisión, de apunte o de ejecución antes de tocar el swing; rutina mental de 3 pasos; para los nervios, las tres preguntas (dónde quiero que caiga, a qué apunto, cómo respiro); una vuelta normal es handicap más 3; cerrar cada hoyo en el green y evitar el tren de bogeys con el golpe aburrido. '+
    'El jugador tiene handicap '+hf(curHcp())+' y quiere llegar a 25. Vuelta '+TIPOS[tipoOf(r)].toLowerCase()+' en '+r.courseName+': '+t.g+' golpes en '+t.n+' hoyos ('+rel(t.rel)+').\n'+holes+
    '\nSensaciones: '+((f.sens||[]).join(', ')||'-')+'. Confianza '+f.conf+'/5. Ansiedad '+f.ans+'/5. Causas externas: '+((f.causes||[]).join(', ')||'-')+'. Mejor sensación: '+(f.best||'-')+'. Qué haría distinto: '+(f.next||'-')+'. Después de un mal hoyo buscó: '+(f.after==='heroico'?'recuperar todo de una':f.after==='seguro'?'el golpe seguro':'-')+'.\n'+
@@ -1200,9 +1207,9 @@ function vCourse(){
 }
 function courseTotals(c){ var p=0,a=0,b=0; c.holes.forEach(function(h){p+=h.par||0;a+=h.ydH||0;b+=h.ydD||0;}); return 'Par '+p+', '+a.toLocaleString('es-AR')+' yardas caballeros, '+b.toLocaleString('es-AR')+' yardas damas.'; }
 function csv(){
-  var rows=[['fecha','tipo','cancha','hoyo','par','handicap_hoyo','yardas','golpes','golpes_recibidos','salida_en_juego','salida_lado','green_metros','en_green','cerca','putts','putts_cortos_menos_1m','penales','salida_metros_gps','animo','rutina']];
+  var rows=[['fecha','tipo','cancha','hoyo','par','handicap_hoyo','yardas','golpes','golpes_recibidos','salida_en_juego','salida_lado','green_metros','en_green','cerca','putts','putts_cortos_menos_1m','penales','salida_metros_gps','animo','concentrado','rutina']];
   sortedRounds().reverse().forEach(function(r){ var rc=recvMap(r.holes,r.hcp); r.holes.forEach(function(h){ var d=r.scores[h.n]; if(!d) return;
-    rows.push([r.date,TIPOS[tipoOf(r)],r.courseName,h.n,h.par,h.si,h.yd||'',d.s==null?'':d.s,rc[h.n]||0,d.sal==null?'':(d.sal?'si':'no'),d.lado||'',d.gd==null?'':d.gd,d.ge==null?'':(d.ge?'si':'no'),d.c==null?'':d.c,d.p==null?'':d.p,d.pc==null?'':d.pc,d.pen==null?'':d.pen,(h.par>3&&d.pts&&d.pts.length>=2)?hav(d.pts[0],d.pts[1]):'',d.an?ANIMO[d.an].toLowerCase():'',d.rut==null?'':(d.rut?'si':'no')]); }); });
+    rows.push([r.date,TIPOS[tipoOf(r)],r.courseName,h.n,h.par,h.si,h.yd||'',d.s==null?'':d.s,rc[h.n]||0,d.sal==null?'':(d.sal?'si':'no'),d.lado||'',d.gd==null?'':d.gd,d.ge==null?'':(d.ge?'si':'no'),d.c==null?'':d.c,d.p==null?'':d.p,d.pc==null?'':d.pc,d.pen==null?'':d.pen,(h.par>3&&d.pts&&d.pts.length>=2)?hav(d.pts[0],d.pts[1]):'',d.an?ANIMO[d.an].toLowerCase():'',d.foco==null?'':(d.foco?'si':'no'),d.rut==null?'':(d.rut?'si':'no')]); }); });
   var text='\ufeff'+rows.map(function(r){return r.map(function(v){v=String(v);return /[",;\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}).join(';');}).join('\r\n');
   saveFile('mis-vueltas-de-golf.csv',text,'text/csv;charset=utf-8'); toast('CSV descargado');
 }
@@ -1341,6 +1348,7 @@ var ACT={
   sal:function(el){ keepDict(); var r=curRound(), d=r.scores[UI.hole]||{}, v=el.dataset.v, cur=d.sal===true?'ok':d.sal===false?(d.lado||'no'):null;
     if(cur===v) setHole(r,UI.hole,{sal:null,lado:null}); else if(v==='ok') setHole(r,UI.hole,{sal:true,lado:null}); else setHole(r,UI.hole,{sal:false,lado:v}); },
   an:function(el){ keepDict(); var r=curRound(), d=r.scores[UI.hole]||{}, v=el.dataset.v; setHole(r,UI.hole,{an:d.an===v?null:v}); },
+  foco:function(el){ keepDict(); var r=curRound(), d=r.scores[UI.hole]||{}, v=el.dataset.v==='1'; setHole(r,UI.hole,{foco:d.foco===v?null:v}); },
   rut:function(el){ keepDict(); var r=curRound(), d=r.scores[UI.hole]||{}, v=el.dataset.v==='1'; setHole(r,UI.hole,{rut:d.rut===v?null:v}); },
   ge:function(el){ keepDict(); var r=curRound(), d=r.scores[UI.hole]||{}, v=el.dataset.v==='1'; setHole(r,UI.hole,{ge:d.ge===v?null:v}); },
   gd:function(el){ keepDict(); var r=curRound(), d=r.scores[UI.hole]||{}, v=+el.dataset.v; setHole(r,UI.hole,{gd:d.gd===v?null:v}); },
