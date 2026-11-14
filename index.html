@@ -465,12 +465,15 @@ function parseDictado(raw,par){
    || take(/\b(\d{1,2}) (?:golpes? )?cerca\b/,function(m){R.c=+m[1];})
    || take(/\b(\d{1,2}) (?:golpes? )?(?:desde |de )?(?:adentro|dentro|menos) de (?:los )?90(?: metros)?\b/,function(m){R.c=+m[1];});
   // putts y penales
+  // los penales van primero, para que "1 corto, 1 penal" no le robe el número al penal
+  take(/\bsin (?:penal(?:es|idad|idades)?|multas?)\b/,function(){R.pen=0;})
+   || take(/\b(\d) (?:golpes? de )?(?:penal(?:es|idad|idades)?|multas?)\b/,function(m){R.pen=+m[1];})
+   || take(/\b(?:penal|penalidad|multa)\b/,function(){R.pen=1;});
   var PT='(?:putts?|puts?|pats?|pots?)';
-  take(new RegExp('\\bcortos? (\\d{1,2})\\b(?! ?'+PT+')'),function(m){R.pc=+m[1];})
+  take(new RegExp('\\bcortos? (\\d{1,2})\\b(?! ?(?:'+PT+'|golpes?|metros?|de cerca|cerca))'),function(m){R.pc=+m[1];})
    || take(new RegExp('\\b(\\d{1,2}) '+PT+' (?:cortos?|(?:de |desde )?(?:menos de )?(?:1|un) metro)\\b'),function(m){R.pc=+m[1];});
   take(/\b(\d{1,2}) (?:putts?|puts?|pats?|pots?)\b/,function(m){R.p=+m[1];}) || take(/\b(?:putts?|puts?|pats?) (\d{1,2})\b/,function(m){R.p=+m[1];});
   if(R.pc==null) take(/\b(\d{1,2}) (?:cortos?|(?:de |desde )?menos de 1 metro)\b/,function(m){R.pc=+m[1];});
-  take(/\bsin (?:penal(?:es|idad|idades)?|multas?)\b/,function(){R.pen=0;}) || take(/\b(\d) (?:golpes? de )?(?:penal(?:es|idad|idades)?|multas?)\b/,function(m){R.pen=+m[1];});
   // distancia al green
   take(/\b(?:al |a |el )?green (?:fue )?(?:desde |de |a |con )?(?:los |las )?(\d{2,3})(?: (metros|yardas|m|yd))?\b/,dist)
    || take(/\b(\d{2,3})(?: (metros|yardas|m|yd))? (?:al|a|para el|hasta el|del) green\b/,dist)
